@@ -1,11 +1,9 @@
-//
-// Created by Pooya Sadeghi on 2023-02-28.
-//
-
 #include "server.h"
 #include <iostream>
+#include <glog/logging.h>
 
 serverConfig get_server_config(string path) {
+    LOG(INFO) << "Start initializing server configuration from: [" << path << ']';
     auto conf = serverConfig{};
 
     auto j = readJsonFile(path);

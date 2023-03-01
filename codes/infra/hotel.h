@@ -24,4 +24,6 @@ typedef struct HotelRoom{
     vector<RoomUser> users;
 } HotelRoom;
 
+vector<HotelRoom> get_hotel_information(string path);
+
 #endif //SRC_HOTEL_H
