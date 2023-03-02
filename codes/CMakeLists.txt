@@ -1,19 +1,21 @@
 cmake_minimum_required(VERSION 3.24)
-project(codes)
+project(codes VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
 FetchContent_Declare(
-        json
+        nlohmann_json
         GIT_REPOSITORY https://github.com/nlohmann/json.git
-        GIT_TAG v3.10.4
+        GIT_TAG        v3.10.4
 )
-FetchContent_MakeAvailable(json)
-include_directories(${json_SOURCE_DIR}/single_include)
+FetchContent_GetProperties(nlohmann_json)
+if(NOT nlohmann_json_POPULATED)
+    FetchContent_Populate(nlohmann_json)
+    add_subdirectory(${nlohmann_json_SOURCE_DIR} ${nlohmann_json_BINARY_DIR})
+endif()
 
-include(FetchContent)
 FetchContent_Declare(
         glog
         GIT_REPOSITORY https://github.com/google/glog.git
@@ -27,5 +29,6 @@ add_executable(codes
         infra/filehandler.cpp
         infra/hotel.cpp
         infra/server.cpp
-        infra/user.cpp)
-target_link_libraries(codes glog::glog)
+        infra/user.cpp
+        )
+target_link_libraries(codes nlohmann_json glog::glog)
