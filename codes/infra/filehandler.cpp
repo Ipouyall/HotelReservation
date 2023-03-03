@@ -10,7 +10,6 @@ json readJsonFile(std::string filePath)
     std::ifstream fileStream(filePath);
     if (!fileStream.is_open()) {
         LOG(FATAL) << "Failed to open JSON file: [" << filePath << ']';
-        exit(1);
     }
     std::string fileContent((std::istreambuf_iterator<char>(fileStream)),
                             std::istreambuf_iterator<char>());

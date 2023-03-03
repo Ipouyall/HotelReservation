@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(codes VERSION 0.0.1 LANGUAGES CXX)
+project(HotelReservation VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -24,11 +24,24 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glog)
 include_directories(${glog_SOURCE_DIR}/src)
 
-add_executable(codes
+add_executable(hr_test
         main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
         infra/server.cpp
-        infra/user.cpp
-        )
-target_link_libraries(codes nlohmann_json glog::glog)
+        infra/user.cpp)
+add_executable(hr_server
+        server/main.cpp
+        infra/filehandler.cpp
+        infra/hotel.cpp
+        infra/server.cpp
+        infra/user.cpp)
+add_executable(hr_client
+        client/main.cpp
+        infra/filehandler.cpp
+        infra/hotel.cpp
+        infra/server.cpp
+        infra/user.cpp)
+target_link_libraries(hr_test nlohmann_json glog::glog)
+target_link_libraries(hr_server nlohmann_json glog::glog)
+target_link_libraries(hr_client nlohmann_json glog::glog)

@@ -18,7 +18,7 @@ typedef struct RoomUser{
 typedef struct HotelRoom{
     string room_number;
     bool is_full; // also called status
-    int price_per_user;
+    int price_per_bed;
     int max_capacity;
     int current_capacity;
     vector<RoomUser> users;

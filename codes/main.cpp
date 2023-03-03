@@ -33,6 +33,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     for (auto _u:u){
         cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << endl;
     }
+    sleep(10);
 
     google::ShutdownGoogleLogging();
     return 0;

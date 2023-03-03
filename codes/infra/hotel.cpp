@@ -14,7 +14,7 @@ vector<HotelRoom> get_hotel_information(string path) {
         HotelRoom info;
         info.room_number = j["number"];
         info.is_full = j["status"] == 1;
-        info.price_per_user = j["price"];
+        info.price_per_bed = j["price"];
         info.max_capacity = j["maxCapacity"];
         info.current_capacity = j["capacity"];
         for (auto u: j["users"]) {
