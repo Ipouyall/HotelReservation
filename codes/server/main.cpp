@@ -9,10 +9,12 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include "infra/socketUtils.h"
 
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 8081
+#define STDOUT 1
 
 const std::string ERROR_CLIENT = "error";
 
@@ -58,27 +60,7 @@ void addNewClient(std::string name, std::vector<Client*>& clients, int sock_fd, 
     client->client_fd = sock_fd;
     client->active = active;
 }
-int acceptClient(int server_fd) {
-    int client_fd;
-    struct sockaddr_in client_address;
-    int address_len = sizeof(client_address);
-    client_fd = accept(server_fd, (struct sockaddr *)&client_address, (socklen_t*) &address_len);
-    return client_fd;
-}
-int setupServer(const char* server_ip, int port) {
-    struct sockaddr_in address;
-    const int server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    const int opt = 1;
-    setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(server_ip);
-    address.sin_port = htons(port);
-    int result=bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-    if(result==-1)
-        return -1;
-    listen(server_fd, 20);
-    return server_fd;
-}
+
 
 void Info(const std::vector<Client*>& clients) {
     for(const auto& client : clients){

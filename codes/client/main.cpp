@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
+#include "infra/socketUtils.h"
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 8081
@@ -14,31 +15,12 @@
 
 using namespace std;
 
-int connect_server(const char* server_ip, int server_port) {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd == -1) {
-        perror("socket");
-        exit(1);
-    }
-
-    struct sockaddr_in server_address;
-    memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(server_port);
-    server_address.sin_addr.s_addr = inet_addr(server_ip);
-
-    if (connect(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
-        perror("connect");
-    }
-
-    return sockfd;
-}
 
 int main(int argc, char const *argv[]) {
     int sockfd;
     char buffer[BUFFER_SIZE];
 
-    sockfd = connect_server(SERVER_IP, SERVER_PORT);
+    sockfd = connectServer(SERVER_IP, SERVER_PORT);
 
     string name;
     cin >> name;
