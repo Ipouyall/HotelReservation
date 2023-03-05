@@ -7,7 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
-#include "infra/socketUtils.h"
+#include "../infra/socketUtils.h"
 
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 8081
