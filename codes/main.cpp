@@ -1,6 +1,6 @@
 #include "infra/server.h"
 #include "infra/hotel.h"
-#include "infra//user.h"
+#include "infra/user.h"
 #include <iostream>
 #include <glog/logging.h>
 

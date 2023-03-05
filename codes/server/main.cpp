@@ -9,12 +9,10 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <glog/logging.h>
 #include "../infra/socketUtils.h"
+#include "../infra/server.h"
 
-
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 8081
-#define STDOUT 1
 
 const std::string ERROR_CLIENT = "error";
 
@@ -93,21 +91,34 @@ void removeClient(std::vector<Client*>& clients, std::string name){
     }
 }
 
+void signalHandler(int signum) {
+    LOG(INFO) << "Received signal " << signum << ", terminating the program...";
+    google::ShutdownGoogleLogging();
+    exit(signum);
+}
+
 int main(int argc, char *argv[]){
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_colorlogtostderr = true;
+    FLAGS_log_prefix = true;
+    FLAGS_logtostderr = true;
+    FLAGS_alsologtostderr = true;
+    signal(SIGINT, signalHandler);
+    LOG(INFO) << "Initializing Server...";
     std::vector<Client*> clients;
 
     int server_fd, new_socket, max_sd;
     char buffer[1024] = {0};
     fd_set master_set, working_set;
+    auto server_info = get_server_config(DEFAULT_SERVER_PATH);
 
-
-    server_fd = setupServer(SERVER_IP, SERVER_PORT);
+    server_fd = setupServer(server_info.host_name.c_str(), server_info.port);
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
     // FD_SET(STDIN, &master_set);
 
-    write(1, "Server is running\n", 19);
+    LOG(INFO) << "Server is running...";
     while (true) {
         working_set = master_set;
         memset(buffer, 0, 1024);
@@ -115,7 +126,7 @@ int main(int argc, char *argv[]){
         for(int i = 0;i < FD_SETSIZE;i++){
             if (FD_ISSET(i, &working_set)) {
                 if(i == server_fd){
-                    std::cout << "new client come = " << i << std::endl;
+                    LOG(INFO) << "New client reached";
                     new_socket = acceptClient(i);
                     if(new_socket!=-1)
                         FD_SET(new_socket, &master_set);
@@ -135,9 +146,9 @@ int main(int argc, char *argv[]){
                     std::string response = "ok";
 
                     if(send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
-                        write(STDOUT,"Your response sent.\n",21);
+                        LOG(INFO) << "Your response sent";
                     else
-                        write(STDOUT,"Eror on sending your Response!\n",32);
+                        LOG(WARNING) << "Error on sending your Response!";
 
 
 
@@ -165,9 +176,9 @@ int main(int argc, char *argv[]){
                             removeClient(clients, ERROR_CLIENT);
                             std::string response = "Sorry you cant login";
                             if(send(i, response.c_str(), strlen(response.c_str()), 0)!=-1)
-                                write(STDOUT,"Your response sent.\n",21);
+                                LOG(INFO) << "Your response sent";
                             else
-                                write(STDOUT,"Eror on sending your Response!\n",32);
+                                LOG(WARNING) << "Eror on sending your Response!";
                             close(i);
                             FD_CLR(i, &master_set);
                         }
@@ -180,5 +191,6 @@ int main(int argc, char *argv[]){
             }
         }
     }
+    google::ShutdownGoogleLogging();
     return 0;
 }

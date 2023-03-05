@@ -7,20 +7,28 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/select.h>
+#include <glog/logging.h>
 #include "../infra/socketUtils.h"
+#include "../infra/server.h"
 
-#define SERVER_IP "127.0.0.1"
-#define SERVER_PORT 8081
 #define BUFFER_SIZE 1024
 
 using namespace std;
 
 
 int main(int argc, char const *argv[]) {
+    google::InitGoogleLogging(argv[0]);
+    FLAGS_colorlogtostderr = true;
+    FLAGS_log_prefix = true;
+    FLAGS_logtostderr = true;
+    FLAGS_alsologtostderr = true;
+    LOG(INFO) << "Initializing Client...";
+
+    auto server_info = get_server_config(DEFAULT_SERVER_PATH);
     int sockfd;
     char buffer[BUFFER_SIZE];
 
-    sockfd = connectServer(SERVER_IP, SERVER_PORT);
+    sockfd = connectServer(server_info.host_name.c_str(), server_info.port);
 
     string name;
     cin >> name;
@@ -76,6 +84,6 @@ int main(int argc, char const *argv[]) {
             }
         }
     }
-
+    google::ShutdownGoogleLogging();
     return 0;
 }
