@@ -18,7 +18,8 @@
 #include <string>
 
 int acceptClient(int server_fd);
-int setupServer(const char* server_ip, int port);
-int connectServer(const char* server_ip, int server_port);
+int setupServer(const char* server_ip, int port, int listen_for=20);
+int connectServer(const char* server_ip, int server_port, bool& succeeded);
+bool reconnectServer(const char* server_ip, int server_port, int& sockfd);
 
 #endif //SOCKET_UTILS_H

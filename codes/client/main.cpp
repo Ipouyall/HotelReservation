@@ -28,7 +28,14 @@ int main(int argc, char const *argv[]) {
     int sockfd;
     char buffer[BUFFER_SIZE];
 
-    sockfd = connectServer(server_info.host_name.c_str(), server_info.port);
+    bool connected;
+    sockfd = connectServer(server_info.host_name.c_str(), server_info.port, connected);
+
+    while (!connected){
+        LOG(WARNING) << "Reconnecting in 2 seconds";
+        sleep(2);
+        connected = reconnectServer(server_info.host_name.c_str(), server_info.port, sockfd);
+    }
 
     string name;
     cin >> name;

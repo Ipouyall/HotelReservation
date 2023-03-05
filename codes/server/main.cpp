@@ -92,7 +92,7 @@ void removeClient(std::vector<Client*>& clients, std::string name){
 }
 
 void signalHandler(int signum) {
-    LOG(INFO) << "Received signal " << signum << ", terminating the program...";
+    LOG(WARNING) << "Received signal " << signum << ", terminating the program...";
     google::ShutdownGoogleLogging();
     exit(signum);
 }
@@ -126,7 +126,6 @@ int main(int argc, char *argv[]){
         for(int i = 0;i < FD_SETSIZE;i++){
             if (FD_ISSET(i, &working_set)) {
                 if(i == server_fd){
-                    LOG(INFO) << "New client reached";
                     new_socket = acceptClient(i);
                     if(new_socket!=-1)
                         FD_SET(new_socket, &master_set);
@@ -171,21 +170,21 @@ int main(int argc, char *argv[]){
                             removeRepeatedUser(clients);
                         }
                         else{
-                            std::cout << "Eror: client = " << name << " alredy is login!" << std::endl;
+                            LOG(ERROR) << "client = " << name << " already logged in";
                             client->name = ERROR_CLIENT;
                             removeClient(clients, ERROR_CLIENT);
                             std::string response = "Sorry you cant login";
                             if(send(i, response.c_str(), strlen(response.c_str()), 0)!=-1)
                                 LOG(INFO) << "Your response sent";
                             else
-                                LOG(WARNING) << "Eror on sending your Response!";
+                                LOG(WARNING) << "Error on sending your Response!";
                             close(i);
                             FD_CLR(i, &master_set);
                         }
 
                     }
                     else {
-                        std::cout << "client name = " << client->name << " said = " << buffer << std::endl;
+                        LOG(INFO) << "client name = " << client->name << " said = " << buffer;
                     }
                 }
             }
