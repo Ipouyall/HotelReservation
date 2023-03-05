@@ -26,6 +26,8 @@ Run:
 cmake .
 ```
 
+This could take up to 30(min) for the first time.
+
 ### Build project
 
 Run:
@@ -34,4 +36,5 @@ Run:
 make
 ```
 
+This command would generate `hr_test`, `hr_client`, `hr_server`.
 ***
