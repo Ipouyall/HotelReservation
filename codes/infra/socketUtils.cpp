@@ -1,3 +1,4 @@
+#include <array>
 #include <glog/logging.h>
 #include "socketUtils.h"
 
@@ -11,6 +12,22 @@ int acceptClient(int server_fd) {
     LOG(INFO) << "Accepted client with fd::" << client_fd;
     return client_fd;
 }
+std::string get_program_name_on_port(int port) {
+    std::string command = "lsof -i :" + std::to_string(port) + "| awk '!/COMMAND/{print $1}'";
+    std::array<char, 128> buffer;
+    std::string result = "";
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    if (!result.empty() && result.back() == '\n') {
+        result.pop_back(); // remove newline character if it exists
+    }
+    return result;
+}
 
 int setupServer(const char* server_ip, int port, int listen_for) {
     LOG(INFO) << "Starting server...";
@@ -22,8 +39,13 @@ int setupServer(const char* server_ip, int port, int listen_for) {
     address.sin_addr.s_addr = inet_addr(server_ip);
     address.sin_port = htons(port);
     int result=bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-    if(result==-1)
-        return -1;
+    if(result==-1) {
+        char err_msg[512];
+        snprintf(err_msg, sizeof(err_msg),
+                 "Another server from %s is already listening on %s:%d",
+                 get_program_name_on_port(port).c_str(), server_ip, port);
+        LOG(FATAL) << err_msg;
+    }
     listen(server_fd, listen_for);
     LOG(INFO) << "Server Listening on: " << server_ip << ":" << port << " for " << listen_for << "client";
     return server_fd;
