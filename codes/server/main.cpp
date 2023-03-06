@@ -62,8 +62,9 @@ int main(int argc, char *argv[]){
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
-    signal(SIGINT, signalHandler);
     LOG(INFO) << "Initializing Server...";
+
+    signal(SIGINT, signalHandler);
 
     std::vector<Client*> clients;
 

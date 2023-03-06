@@ -14,6 +14,7 @@ int acceptClient(int server_fd) {
     LOG(INFO) << "Accepted client with fd::" << client_fd;
     return client_fd;
 }
+
 std::string get_program_name_on_port(int port) {
     std::string command = "lsof -i :" + std::to_string(port) + "| awk '!/COMMAND/{print $1}'";
     std::array<char, 128> buffer;
@@ -57,7 +58,7 @@ int connectServer(const char* server_ip, int server_port, bool& succeeded) {
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     LOG(INFO) << "Connecting to server: " << server_ip << ":" << server_port;
     if (sockfd == -1) {
-        perror("socket creation >>> ");
+        // perror("socket creation >>> ");
         LOG(FATAL) << "Socket failed";
     }
 
@@ -70,7 +71,6 @@ int connectServer(const char* server_ip, int server_port, bool& succeeded) {
     if (connect(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
         succeeded = false;
         LOG(ERROR) << "Connection refused";
-        perror("--connect:");
     }
     else {
         LOG(INFO) << "Connected successfully";
@@ -83,7 +83,7 @@ bool reconnectServer(const char* server_ip, int server_port, int& sockfd){
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     LOG(INFO) << "Reconnecting to server: " << server_ip << ":" << server_port;
     if (sockfd == -1) {
-        perror("socket creation >>> ");
+        // perror("socket creation >>> ");
         LOG(FATAL) << "Socket failed";
     }
 
@@ -95,7 +95,6 @@ bool reconnectServer(const char* server_ip, int server_port, int& sockfd){
 
     if (connect(sockfd, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
         LOG(ERROR) << "Connection refused:";
-        perror("--connect:");
         return false;
     }
     LOG(INFO) << "Connected successfully";
