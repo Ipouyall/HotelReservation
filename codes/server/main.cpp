@@ -75,6 +75,7 @@ int main(int argc, char *argv[]){
     FLAGS_alsologtostderr = true;
     signal(SIGINT, signalHandler);
     LOG(INFO) << "Initializing Server...";
+
     std::vector<Client*> clients;
 
     int server_fd, new_socket, max_sd;
