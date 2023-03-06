@@ -1,4 +1,6 @@
+#include <string>
 #include <array>
+#include <memory>
 #include <glog/logging.h>
 #include "socketUtils.h"
 
