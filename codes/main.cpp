@@ -2,6 +2,10 @@
 #include "infra/hotel.h"
 #include "infra/user.h"
 #include <iostream>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include <glog/logging.h>
 
 void signalHandler(int signum) {

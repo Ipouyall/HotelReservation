@@ -10,11 +10,13 @@
 #include <iostream>
 #include <vector>
 #include <glog/logging.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
 
-
-const std::string ERROR_CLIENT = "error";
 
 
 struct Client{
@@ -59,38 +61,6 @@ void addNewClient(std::string name, std::vector<Client*>& clients, int sock_fd, 
     client->active = active;
 }
 
-
-void Info(const std::vector<Client*>& clients) {
-    for(const auto& client : clients){
-        std::cout << "name = " << client->name << std::endl;
-
-        std::cout << "active = " << client->active << std::endl;
-
-        std::cout << "fd = " << client->client_fd << std::endl;
-    }
-}
-void removeRepeatedUser(std::vector<Client*>& clients){
-    for(int i = 0;i < clients.size();i++){
-        for(int j = 0;j < clients.size();j++){
-            if(clients[i]->client_fd == clients[j]->client_fd && clients[j]->name == ""
-               && clients[i]->active && clients[j]->active){
-                clients.erase(clients.begin() + j);
-                j--;
-                continue;
-            }
-
-        }
-    }
-}
-void removeClient(std::vector<Client*>& clients, std::string name){
-    for(int i = 0;i < clients.size();i++){
-        if(clients[i]->name == name){
-            clients.erase(clients.begin() + i);
-            i--;
-        }
-    }
-}
-
 void signalHandler(int signum) {
     LOG(WARNING) << "Received signal " << signum << ", terminating the program...";
     google::ShutdownGoogleLogging();
@@ -109,6 +79,7 @@ int main(int argc, char *argv[]){
 
     int server_fd, new_socket, max_sd;
     char buffer[1024] = {0};
+    std::string bufferString;
     fd_set master_set, working_set;
     auto server_info = get_server_config(DEFAULT_SERVER_PATH);
 
@@ -116,7 +87,6 @@ int main(int argc, char *argv[]){
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
-    // FD_SET(STDIN, &master_set);
 
     LOG(INFO) << "Server is running...";
     while (true) {
@@ -139,8 +109,11 @@ int main(int argc, char *argv[]){
                         client->active = false;
                         close(i);
                         FD_CLR(i, &master_set);
+                        LOG(INFO) << "Client gone";
                         continue;
                     }
+
+                    bufferString = buffer;
 
                     std::string response = "ok";
 
@@ -150,9 +123,9 @@ int main(int argc, char *argv[]){
                         LOG(WARNING) << "Error on sending your Response!";
 
 
-
-                    char* name = strtok(buffer," ");
-                    std::string nameString = name;
+                    std::istringstream iss(bufferString);
+                    std::string nameString;
+                    std::getline(iss, nameString, ' ');
 
 
                     Client* client = findClientByFd(clients, i);
@@ -160,28 +133,6 @@ int main(int argc, char *argv[]){
 
                     if(client->name == "" && client->active && oldClient == NULL){
                         client->name = nameString;
-                        std::cout << "welcome " << client->name << std::endl;
-                    }
-                    else if(oldClient != NULL){
-                        if(!oldClient->active){
-                            std::cout<<"user = " << name << " come again!" << std::endl;
-                            oldClient->active = true;
-                            oldClient->client_fd = i;
-                            removeRepeatedUser(clients);
-                        }
-                        else{
-                            LOG(ERROR) << "client = " << name << " already logged in";
-                            client->name = ERROR_CLIENT;
-                            removeClient(clients, ERROR_CLIENT);
-                            std::string response = "Sorry you cant login";
-                            if(send(i, response.c_str(), strlen(response.c_str()), 0)!=-1)
-                                LOG(INFO) << "Your response sent";
-                            else
-                                LOG(WARNING) << "Error on sending your Response!";
-                            close(i);
-                            FD_CLR(i, &master_set);
-                        }
-
                     }
                     else {
                         LOG(INFO) << "client name = " << client->name << " said = " << buffer;

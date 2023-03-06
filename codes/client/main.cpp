@@ -8,6 +8,10 @@
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <glog/logging.h>
+#include <signal.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <stdlib.h>
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
 
@@ -46,7 +50,6 @@ int main(int argc, char const *argv[]) {
     FD_SET(STDIN_FILENO, &master_set);
 
     send(sockfd, name.c_str(), strlen(name.c_str()), 0);
-    cout << "Your name is: " << name << endl;
 
     while (true) {
         working_set = master_set;
@@ -59,20 +62,10 @@ int main(int argc, char const *argv[]) {
                     read(STDIN_FILENO, buffer, BUFFER_SIZE);
                     buffer[strlen(buffer)-1] = '\0';
 
-                    char* command = strtok(buffer, " ");
-                    if (strcmp(command, "send") == 0) {
-                        char* message = strtok(NULL, "\n");
-                        send(sockfd, message, strlen(message), 0);
-                    }
-                    else if (strcmp(command, "exit") == 0) {
-                        close(sockfd);
-                        FD_CLR(sockfd, &master_set);
-                        cout << "Goodbye!" << endl;
-                        return 0;
-                    }
-                    else {
-                        cout << "Invalid command!" << endl;
-                    }
+                    if(send(sockfd, buffer, strlen(buffer), 0) != -1)
+                        LOG(INFO) << "Your response sent to server.";
+                    else
+                        LOG(WARNING) << "Error on sending your response to server!";
                 }
                 else if (i == sockfd) {
                     memset(buffer, 0, BUFFER_SIZE);
@@ -80,13 +73,13 @@ int main(int argc, char const *argv[]) {
                     if (bytes_received == 0) {
                         close(sockfd);
                         FD_CLR(sockfd, &master_set);
-                        cout << "Server closed!" << endl;
+                        LOG(INFO) << "Server closed!";
                         return 0;
                     }
-                    cout << "Server said: " << buffer << endl;
+                    LOG(INFO) << "Server said: " << buffer;
                 }
                 else {
-                    cout << "Unknown file descriptor: " << i << endl;
+                    LOG(INFO) << "Unknown file descriptor: " << i ;
                 }
             }
         }
