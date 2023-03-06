@@ -20,7 +20,6 @@
 
 
 struct Client{
-    std::string name;
     int client_fd;
     bool active;
 };
@@ -28,20 +27,11 @@ Client* newClient() {
     Client* new_client = new Client();
     if (new_client == nullptr)
         exit(EXIT_FAILURE);
-    new_client->name = "";
     new_client->active = false;
     new_client->client_fd = -1;
     return new_client;
 }
 
-Client* findClient(const std::vector<Client*>& clients, std::string clientName) {
-    for (const auto& client : clients) {
-        if (client->name == clientName) {
-            return client;
-        }
-    }
-    return nullptr;
-}
 Client* findClientByFd(const std::vector<Client*>& clients, int fd) {
     for (const auto& client : clients) {
         if (client->client_fd == fd) {
@@ -50,13 +40,12 @@ Client* findClientByFd(const std::vector<Client*>& clients, int fd) {
     }
     return nullptr;
 }
-void addNewClient(std::string name, std::vector<Client*>& clients, int sock_fd, bool active) {
-    auto client = findClient(clients, name);
+void addNewClient(int client_fd, std::vector<Client*>& clients, int sock_fd, bool active) {
+    auto client = findClientByFd(clients, client_fd);
     if (client == nullptr) {
         clients.push_back(newClient());
         client = clients.back();
     }
-    client->name = name;
     client->client_fd = sock_fd;
     client->active = active;
 }
@@ -101,7 +90,7 @@ int main(int argc, char *argv[]){
                     if(new_socket!=-1)
                         FD_SET(new_socket, &master_set);
                     std::string empty = "";
-                    addNewClient(empty, clients, new_socket, true);
+                    addNewClient(new_socket, clients, new_socket, true);
                 }
                 else{
                     int bytes_received = recv(i , buffer, 1024, 0);
@@ -128,16 +117,7 @@ int main(int argc, char *argv[]){
                     std::string nameString;
                     std::getline(iss, nameString, ' ');
 
-
-                    Client* client = findClientByFd(clients, i);
-                    Client* oldClient = findClient(clients, nameString);
-
-                    if(client->name == "" && client->active && oldClient == NULL){
-                        client->name = nameString;
-                    }
-                    else {
-                        LOG(INFO) << "client name = " << client->name << " said = " << buffer;
-                    }
+                    LOG(INFO) << "client fd = " << i << " said = " << buffer;
                 }
             }
         }

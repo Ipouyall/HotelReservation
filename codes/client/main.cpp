@@ -41,15 +41,10 @@ int main(int argc, char const *argv[]) {
         connected = reconnectServer(server_info.host_name.c_str(), server_info.port, sockfd);
     }
 
-    string name;
-    cin >> name;
-
     fd_set master_set, working_set;
     FD_ZERO(&master_set);
     FD_SET(sockfd, &master_set);
     FD_SET(STDIN_FILENO, &master_set);
-
-    send(sockfd, name.c_str(), strlen(name.c_str()), 0);
 
     while (true) {
         working_set = master_set;
