@@ -1,7 +1,3 @@
-//
-// Created by Pooya Sadeghi on 2023-02-28.
-//
-
 #ifndef SRC_SERVER_H
 #define SRC_SERVER_H
 
