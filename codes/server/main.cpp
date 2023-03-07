@@ -57,8 +57,8 @@ int main(int argc, char *argv[]){
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
-
     LOG(INFO) << "Server is running...";
+    
     while (true) {
         working_set = master_set;
         select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
