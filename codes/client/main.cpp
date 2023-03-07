@@ -27,8 +27,9 @@ int connect_to_server(serverConfig& server_info, int max_attempts=10) {
 
     while (!connected && attempt < max_attempts){
         attempt++;
-        LOG(WARNING) << "Reconnecting in 2 seconds";
-        sleep(2);
+        int wait_time = 2 + (attempt/2);
+        LOG(WARNING) << "Reconnecting in " << wait_time << " seconds";
+        sleep(wait_time);
         connected = reconnectServer(server_info.host_name.c_str(), server_info.port, sockfd);
     }
     if(!connected){
