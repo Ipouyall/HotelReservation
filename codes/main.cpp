@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <glog/logging.h>
+#include <date/date.h>
 
 void signalHandler(int signum) {
     LOG(INFO) << "Received signal " << signum << ", terminating the program...";
@@ -37,8 +38,11 @@ int main(int argc, char **argv) { // using just for test functionalities
     for (auto _u:u){
         cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << endl;
     }
-    sleep(10);
 
+    using namespace date;
+    std::cout << weekday{July/5/2001} << '\n';
+
+    sleep(10);
     google::ShutdownGoogleLogging();
     return 0;
 }
