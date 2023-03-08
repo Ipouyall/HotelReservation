@@ -52,10 +52,13 @@ int main(int argc, char **argv) { // using just for test functionalities
     dateManager m;
 
 
-    year_month_day x;
+    year_month_day x, y;
     x = m.convert("25-02-2023");
-    m.inc_day(x, 6);
+    m.incDays(x, 6);
     cout << m.getString(x) << std::endl;
+    y = m.convert("26-04-2023");
+
+    cout << m.isBigger(x, y) <<endl;
     // in >> date::parse("%d-%m-%Y", x);
     // x = sys_days(x) + days{6};
 
