@@ -1,6 +1,7 @@
 #include "infra/server.h"
 #include "infra/hotel.h"
 #include "infra/user.h"
+#include "infra/dateManager.h"
 #include <iostream>
 #include <signal.h>
 #include <unistd.h>
@@ -8,6 +9,7 @@
 #include <stdlib.h>
 #include <glog/logging.h>
 #include <date/date.h>
+#include <iomanip>
 
 void signalHandler(int signum) {
     LOG(INFO) << "Received signal " << signum << ", terminating the program...";
@@ -41,6 +43,30 @@ int main(int argc, char **argv) { // using just for test functionalities
 
     using namespace date;
     std::cout << weekday{July/5/2001} << '\n';
+
+    
+    // std::istringstream in{"25-02-2023"};
+    // std::ostringstream out;
+    // out.fill('0');
+
+    dateManager m;
+
+
+    year_month_day x;
+    x = m.convert("25-02-2023");
+    m.inc_day(x, 6);
+    cout << m.getString(x) << std::endl;
+    // in >> date::parse("%d-%m-%Y", x);
+    // x = sys_days(x) + days{6};
+
+    
+    // out << unsigned{x.month()} << endl;
+    // out << std::setw(2) << unsigned{x.day()} << "/"
+    // << std::setw(2) << unsigned{x.month()}<< "/"
+    // << x.year();
+
+    // std::cout<<out.str()<<std::endl;
+
 
     sleep(10);
     google::ShutdownGoogleLogging();
