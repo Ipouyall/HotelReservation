@@ -14,7 +14,7 @@ std::vector<UserData> get_users_data(std::string path){
         user_data.id = user["id"];
         user_data.username = user["user"];
         user_data.password = user["password"];
-        user_data.privilege = user["admin"] == "true";
+        user_data.privilege = user["admin"];
         if (!user_data.privilege){
             user_data.account_balance = std::stoi(user["purse"].get<std::string>());
             user_data.phone_number = user["phoneNumber"];
