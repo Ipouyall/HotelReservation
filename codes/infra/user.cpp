@@ -1,5 +1,7 @@
-#include <openssl/rand.h>
-#include <openssl/sha.h>
+#include <string>
+#include <random>
+#include <sstream>
+#include <iomanip>
 #include <glog/logging.h>
 #include "user.h"
 
@@ -29,18 +31,19 @@ std::vector<UserData> get_users_data(std::string path){
     return users_data;
 }
 
-std::string generate_token(){
-    unsigned char rand_bytes[32];
-    RAND_bytes(rand_bytes, sizeof(rand_bytes));
+std::string generate_token() {
+    // Create a random number generator with a random seed
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 15);
 
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256(rand_bytes, sizeof(rand_bytes), hash);
-
-    std::string token;
-    token.reserve(2 * SHA256_DIGEST_LENGTH);
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++) {
-        token += "0123456789abcdef"[hash[i] >> 4];
-        token += "0123456789abcdef"[hash[i] & 0xf];
+    // Generate a random token
+    std::stringstream ss;
+    for (int i = 0; i < 32; i++) {
+        int nibble = dis(gen);
+        ss << std::hex << nibble;
     }
+    std::string token = ss.str();
+
     return token;
 }

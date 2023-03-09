@@ -5,6 +5,7 @@
 #include <vector>
 
 #define DEFAULT_USERS_PATH "./config/UsersInfo.json"
+#define SHA256_DIGEST_LENGTH 32
 
 typedef struct UserData{
     int id;

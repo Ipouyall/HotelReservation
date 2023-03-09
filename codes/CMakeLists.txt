@@ -24,17 +24,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glog)
 include_directories(${glog_SOURCE_DIR}/src)
 
-FetchContent_Declare(
-    OpenSSL
-    URL https://www.openssl.org/source/openssl-1.1.1k.tar.gz
-    URL_HASH SHA256=892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
-)
-FetchContent_GetProperties(OpenSSL)
-if(NOT OpenSSL_POPULATED)
-    FetchContent_Populate(OpenSSL)
-    add_subdirectory(${openssl_SOURCE_DIR} ${openssl_BINARY_DIR})
-endif()
-
 add_executable(hr_test
         main.cpp
         infra/filehandler.cpp
@@ -68,7 +57,7 @@ add_executable(hr_client
         infra/decoder.cpp
         infra/encoder.cpp
         )
-
-target_link_libraries(hr_test nlohmann_json glog::glog OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(hr_server nlohmann_json glog::glog OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(hr_client nlohmann_json glog::glog OpenSSL::SSL OpenSSL::Crypto)
+        
+target_link_libraries(hr_test nlohmann_json glog::glog)
+target_link_libraries(hr_server nlohmann_json glog::glog)
+target_link_libraries(hr_client nlohmann_json glog::glog)
