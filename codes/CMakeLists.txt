@@ -27,7 +27,7 @@ include_directories(${glog_SOURCE_DIR}/src)
 FetchContent_Declare(
     OpenSSL
     URL https://www.openssl.org/source/openssl-1.1.1k.tar.gz
-    URL_HASH SHA256=24c6bfc2426da2400a476d9637e481c6f5144ca4c8449abaa5b5a5a69af5f2b5
+    URL_HASH SHA256=892a0875b9872acd04a9fde79b1f943075d5ea162415de3047c327df33fbaee5
 )
 FetchContent_GetProperties(OpenSSL)
 if(NOT OpenSSL_POPULATED)
