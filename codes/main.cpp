@@ -49,16 +49,15 @@ int main(int argc, char **argv) { // using just for test functionalities
     // std::ostringstream out;
     // out.fill('0');
 
-    dateManager m;
 
 
     year_month_day x, y;
-    x = m.convert("25-02-2023");
-    m.incDays(x, 6);
-    cout << m.getString(x) << std::endl;
-    y = m.convert("26-04-2023");
+    x = dateManager::convert("25-02-2023");
+    dateManager::incDays(x, 6);
+    cout << dateManager::getString(x) << std::endl;
+    y = dateManager::convert("26-04-2023");
 
-    cout << m.isBigger(x, y) <<endl;
+    cout << dateManager::isBigger(x, y) <<endl;
     // in >> date::parse("%d-%m-%Y", x);
     // x = sys_days(x) + days{6};
 
