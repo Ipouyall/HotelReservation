@@ -41,6 +41,20 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::cout << "Token1: " << generate_token() << std::endl;
     std::cout << "Token2: " << generate_token() << std::endl;
 
+    UserManager manager;
+
+
+    std::cout << "before insertion" << std::endl;
+    manager.printINfo();
+
+    std::string token = manager.addUser("sfdgdfgffd", "pokopkp54", 50, "0912235222", "werw street, ookok valley");
+
+    std::cout << "after insertion" << std::endl;
+
+    manager.printINfo();
+
+
+
 
     sleep(10);
 

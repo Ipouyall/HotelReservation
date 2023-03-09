@@ -25,5 +25,30 @@ std::string generate_token();
 
 enum class UserRole{ ADMIN, USER };
 
+class UserManager{
+private:
+    std::vector<UserData> users;
+    bool idExist(int id);
+    int createId();
+public:
+    UserManager();
+    int searchByToken(std::string token);
+    int searchByUsername(std::string username);
+    void setFd(std::string token, int fd);
+    bool usernameExist(std::string username);
+    bool userValidation(std::string username, std::string password);
+    std::string addUser(std::string username, std::string password,
+                         int balance, std::string phone, std::string addr);
+    void setToken(std::string username);
+    std::string userLoggedIn(std::string username);
+    bool userLoggedOut(std::string token);
+    bool isLoggedIn(std::string token);
+    UserRole getRole(std::string token);
+    void printINfo();
+    bool reduceBalance(std::string token, int price);
+};
+
+
+
 
 #endif //SRC_USER_H
