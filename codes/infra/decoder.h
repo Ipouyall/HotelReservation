@@ -7,6 +7,7 @@ using json = nlohmann::json;
 
 namespace decode {
     std::string sign_in(std::string& username, std::string& password);
+    std::string recover(std::string& token);
 
     std::string check_username_is_free(std::string& username);
     std::string sign_up(std::string& username, std::string& password, int balance, std::string& phone, std::string& addr);

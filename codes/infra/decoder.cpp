@@ -7,6 +7,13 @@ std::string decode::sign_in(std::string& username, std::string& password){
     return j.dump();
 }
 
+std::string decode::recover(std::string& token){
+    json j;
+    j["kind"] = "recover_client";
+    j["token"] = token;
+    return j.dump();
+}
+
 std::string decode::check_username_is_free(std::string& username){
     json j;
     j["kind"] = "free_username";
