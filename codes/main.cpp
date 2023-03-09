@@ -30,13 +30,18 @@ int main(int argc, char **argv) { // using just for test functionalities
 
     auto h = get_hotel_information(DEFAULT_HOTEL_PATH);
     for (auto _h : h){
-        cout << _h.room_number << ' ' << _h.max_capacity - _h.current_capacity << endl;
+        std::cout << _h.room_number << ' ' << _h.max_capacity - _h.current_capacity << std::endl;
     }
 
     auto u = get_users_data(DEFAULT_USERS_PATH);
     for (auto _u:u){
-        cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << endl;
+        std::cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << std::endl;
     }
+
+    std::cout << "Token1: " << generate_token() << std::endl;
+    std::cout << "Token2: " << generate_token() << std::endl;
+
+
     sleep(10);
 
     google::ShutdownGoogleLogging();
