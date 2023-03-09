@@ -31,7 +31,8 @@ add_executable(hr_test
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
+        infra/saveLog.cpp
+        infra/decoder.cpp)
 add_executable(hr_server
         server/main.cpp
         infra/filehandler.cpp
@@ -39,7 +40,8 @@ add_executable(hr_server
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
+        infra/saveLog.cpp
+        infra/decoder.cpp)
 add_executable(hr_client
         client/main.cpp
         infra/filehandler.cpp
@@ -47,7 +49,8 @@ add_executable(hr_client
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
+        infra/saveLog.cpp
+        infra/decoder.cpp)
 target_link_libraries(hr_test nlohmann_json glog::glog)
 target_link_libraries(hr_server nlohmann_json glog::glog)
 target_link_libraries(hr_client nlohmann_json glog::glog)
