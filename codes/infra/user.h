@@ -28,8 +28,11 @@ enum class UserRole{ ADMIN, USER };
 class UserManager{
 private:
     std::vector<UserData> users;
+
+private:
     bool idExist(int id);
     int createId();
+
 public:
     UserManager();
     int searchByToken(std::string token);
@@ -47,6 +50,7 @@ public:
     void printINfo();
     bool reduceBalance(std::string token, int price);
     bool editInformation(std::string token, std::string new_pass, std::string phone="", std::string addr="");
+    // TODO: add functionality get user/users data
 };
 
 
