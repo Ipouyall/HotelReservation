@@ -30,25 +30,25 @@ private:
     std::vector<UserData> users;
 
 private:
-    bool idExist(int id);
-    int createId();
-    int searchByToken(std::string token);
-    int searchByUsername(std::string username);
+    bool id_exists(int id);
+    int create_Id();
+    int search_by_token(std::string token);
+    int search_by_username(std::string username);
+    
 public:
     UserManager();
-    void setFd(std::string token, int fd);
-    bool usernameExist(std::string username);
-    bool userValidation(std::string username, std::string password);
-    bool addUser(std::string username, std::string password,
+    bool username_exist(std::string username);
+    bool user_validation(std::string username, std::string password);
+    bool signup(std::string username, std::string password,
                          int balance, std::string phone, std::string addr);
-    void setToken(std::string username);
-    std::string userLoggedIn(std::string username);
-    bool userLoggedOut(std::string token);
-    bool isLoggedIn(std::string username);
-    UserRole getRole(std::string token);
+    std::string login(std::string username, int ufd);
+    bool logout(std::string token);
+    bool is_logged_in(std::string username);
+    UserRole get_role(std::string token);
     void printINfo();
-    bool reduceBalance(std::string token, int price);
-    bool editInformation(std::string token, std::string new_pass, std::string phone, std::string addr);
+    bool reduce_balance(std::string token, int price);
+    void increase_balance(std::string token, int amount);
+    bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     // TODO: add functionality get user/users data
 };
 
