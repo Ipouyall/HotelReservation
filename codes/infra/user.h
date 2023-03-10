@@ -47,7 +47,7 @@ public:
     UserRole get_role(std::string token);
     void printINfo();
     bool reduce_balance(std::string token, int price);
-    void increase_balance(std::string token, int amount);
+    bool increase_balance(std::string token, int amount);
     bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     // TODO: add functionality get user/users data
 };

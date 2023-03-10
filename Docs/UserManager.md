@@ -5,18 +5,16 @@ This class manage all users in our HotelReservation application such as adding ,
 
 Now we describe it;s methods:
 
-- `searchByUsername`: Search based on username given and return index of user or -1 if doesn't exist.
-- `searchByToken`: Search based on token given and return index of user or -1 if doesn't exist.
-- `setFd`: Change user fd who correspond to token give with fd given.
-- `usernameExist`: Check that if username give exist in users(`return true`) or not (`return false`).
-- `userValidation`: Check that password given is equal to password saved for username given.
-- `addUser`: Add new user to users based on information given and return true if successfully done.
-- `setToken`: Set token for user based on username given.
-- `userLoggedIn`: Change `is_logged_in` atrribute to `true` , set token and then return it for user based on username given.
-- `userLoggedOut`: Change `is_logged_in` atrribute to `false` , clear token and then return `true` if successfully done.
-- `getRole`: Return role of user based on token given.
-- `isLoggedIn`: Check user is logged in(`return true`) or not (`return false`) based on username given.
-- `reduceBalance`: Reduce account balance of user.
-- `editInformation`: Edit user information.
+- `search_by_username`: Search based on username given and return index of user or -1 if doesn't exist.
+- `search_by_token`: Search based on token given and return index of user or -1 if doesn't exist.
+- `username_exist`: Check that if username give exist in users(`return true`) or not (`return false`).
+- `user_validation`: Check that password given is equal to password saved for username given.
+- `signup`: Add new user to users based on information given and return true if successfully done.
+- `login`: Change `is_logged_in` atrribute to `true` , set token and then return it for user based on username given.
+- `logout`: Change `is_logged_in` atrribute to `false` , clear token and then return `true` if successfully done.
+- `get_role`: Return role of user based on token given.
+- `is_logged_in`: Check user is logged in(`return true`) or not (`return false`) based on username given.
+- `reduce_balance`: Reduce account balance of user.
+- `increase_balance`: Increase account balance of user.
+- `edit_information`: Edit user information.
 
- 

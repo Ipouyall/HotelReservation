@@ -47,9 +47,9 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::cout << "before insertion" << std::endl;
     manager.printINfo();
 
-    manager.addUser("sfdgdfgffd", "pokopkp54", 50, "0912235222", "werw street, ookok valley");
-    std::string token = manager.userLoggedIn("sfdgdfgffd");
-    manager.reduceBalance(token, 20);
+    manager.signup("sfdgdfgffd", "pokopkp54", 50, "0912235222", "werw street, ookok valley");
+    std::string token = manager.login("sfdgdfgffd", 4);
+    manager.reduce_balance(token, 20);
 
     std::cout << "after insertion" << std::endl;
 

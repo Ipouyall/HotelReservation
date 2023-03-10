@@ -91,7 +91,7 @@ bool UserManager::id_exists(int id){
 int UserManager::create_Id(){
     int id = 0;
     while(true){
-        if(!idExist(id))
+        if(!id_exists(id))
             return id;
         id++;
     }
@@ -99,10 +99,10 @@ int UserManager::create_Id(){
 
 bool UserManager::signup(std::string username, std::string password,
                          int balance, std::string phone, std::string addr){
-    if(usernameExist(username))
+    if(username_exist(username))
         return false;
     UserData new_user;
-    new_user.id = createId();
+    new_user.id = create_Id();
     new_user.username = username;
     new_user.password = password;
     new_user.is_logged_in = false;
@@ -118,7 +118,7 @@ bool UserManager::signup(std::string username, std::string password,
 }
 
 std::string UserManager::login(std::string username, int ufd){
-    int index = searchByUsername(username);
+    int index = search_by_username(username);
     if(index != -1){
         users[index].is_logged_in = true;
         users[index].token = generate_token();
@@ -129,7 +129,7 @@ std::string UserManager::login(std::string username, int ufd){
 }
 
 bool UserManager::logout(std::string token){
-    int index = searchByToken(token);
+    int index = search_by_token(token);
     if(index != -1 && users[index].is_logged_in){
         users[index].is_logged_in = false;
         users[index].token = "";
@@ -139,13 +139,13 @@ bool UserManager::logout(std::string token){
 }
 
 UserRole UserManager::get_role(std::string token){
-    int index = searchByToken(token);
+    int index = search_by_token(token);
     
     return users[index].privilege ? UserRole::ADMIN : UserRole::USER;
 }
 
 bool UserManager::is_logged_in(std::string username){
-    int index = searchByUsername(username);
+    int index = search_by_username(username);
     if(index != -1 && users[index].is_logged_in)
         return true;
     return false;
@@ -165,7 +165,7 @@ void UserManager::printINfo(){
 }
 
 bool UserManager::reduce_balance(std::string token, int price){
-    int index = searchByToken(token);
+    int index = search_by_token(token);
     if(index != -1 && users[index].account_balance >= price){
         users[index].account_balance -= price;
         return true;
@@ -174,7 +174,7 @@ bool UserManager::reduce_balance(std::string token, int price){
 }
 
 bool UserManager::increase_balance(std::string token, int amount){
-    int index = searchByToken(token);
+    int index = search_by_token(token);
     if(index != -1){
         users[index].account_balance += amount;
         return true;
@@ -182,9 +182,9 @@ bool UserManager::increase_balance(std::string token, int amount){
     return false;
 }
 
-bool UserManager::editInformation(std::string token, std::string new_pass, 
+bool UserManager::edit_information(std::string token, std::string new_pass, 
                                     std::string phone="", std::string addr=""){
-    int index = searchByToken(token);
+    int index = search_by_token(token);
     if(index != -1){
         users[index].password = new_pass;
         if(users[index].privilege) 
