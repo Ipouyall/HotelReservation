@@ -17,4 +17,4 @@ Now we describe it;s methods:
 - `reduce_balance`: Reduce account balance of user.
 - `increase_balance`: Increase account balance of user.
 - `edit_information`: Edit user information.
-
+- `get_id`: Return id of user base on token given.

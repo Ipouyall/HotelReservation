@@ -195,3 +195,11 @@ bool UserManager::edit_information(std::string token, std::string new_pass,
     }
     return false;
 }
+
+int UserManager::get_id(std::string token){
+    int index = search_by_token(token);
+    if(index != -1){
+        return users[index].id;
+    }
+    return -1;
+}
