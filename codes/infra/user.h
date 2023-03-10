@@ -32,11 +32,10 @@ private:
 private:
     bool idExist(int id);
     int createId();
-
-public:
-    UserManager();
     int searchByToken(std::string token);
     int searchByUsername(std::string username);
+public:
+    UserManager();
     void setFd(std::string token, int fd);
     bool usernameExist(std::string username);
     bool userValidation(std::string username, std::string password);
@@ -49,7 +48,7 @@ public:
     UserRole getRole(std::string token);
     void printINfo();
     bool reduceBalance(std::string token, int price);
-    bool editInformation(std::string token, std::string new_pass, std::string phone="", std::string addr="");
+    bool editInformation(std::string token, std::string new_pass, std::string phone, std::string addr);
     // TODO: add functionality get user/users data
 };
 
