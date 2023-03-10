@@ -48,6 +48,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     manager.printINfo();
 
     std::string token = manager.addUser("sfdgdfgffd", "pokopkp54", 50, "0912235222", "werw street, ookok valley");
+    manager.reduceBalance(token, 20);
 
     std::cout << "after insertion" << std::endl;
 

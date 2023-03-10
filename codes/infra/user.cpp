@@ -58,6 +58,7 @@ int UserManager::searchByUsername(std::string username){
     }
     return -1;
 }
+
 int UserManager::searchByToken(std::string token){
     for(int i = 0;i < users.size();i++){
         if(users[i].token == token)
@@ -109,10 +110,10 @@ int UserManager::createId(){
     }
 }
 
-std::string UserManager::addUser(std::string username, std::string password,
+bool UserManager::addUser(std::string username, std::string password,
                          int balance, std::string phone, std::string addr){
     if(usernameExist(username))
-        return "";
+        return false;
     UserData new_user;
     new_user.id = createId();
     new_user.username = username;
@@ -123,10 +124,10 @@ std::string UserManager::addUser(std::string username, std::string password,
     new_user.address = addr;
     new_user.account_balance = balance;
     new_user.socket_fd = -1;
-    new_user.token = generate_token();
+    new_user.token = "";
 
     users.push_back(new_user);
-    return new_user.token;
+    return true;
 }
 
 void UserManager::setToken(std::string username){
@@ -149,6 +150,7 @@ bool UserManager::userLoggedOut(std::string token){
     int index = searchByToken(token);
     if(index != -1){
         users[index].is_logged_in = false;
+        users[index].token = "";
         return true;
     }
     return false;
@@ -163,8 +165,8 @@ UserRole UserManager::getRole(std::string token){
         return UserRole::USER;
 }
 
-bool UserManager::isLoggedIn(std::string token){
-    int index = searchByToken(token);
+bool UserManager::isLoggedIn(std::string username){
+    int index = searchByUsername(username);
     if(index != -1 && users[index].is_logged_in)
         return true;
     return false;
@@ -187,6 +189,23 @@ bool UserManager::reduceBalance(std::string token, int price){
     int index = searchByToken(token);
     if(index != -1 && users[index].account_balance >= price){
         users[index].account_balance -= price;
+        return true;
+    }
+    return false;
+}
+
+bool UserManager::editInformation(std::string token, std::string new_pass, 
+                                    std::string phone="", std::string addr=""){
+    int index = searchByToken(token);
+    if(index != -1){
+        if(users[index].privilege){
+            users[index].password = new_pass;
+        }
+        else{
+            users[index].password = new_pass;
+            users[index].address = addr;
+            users[index].phone_number = phone;
+        }
         return true;
     }
     return false;

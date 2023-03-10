@@ -37,15 +37,16 @@ public:
     void setFd(std::string token, int fd);
     bool usernameExist(std::string username);
     bool userValidation(std::string username, std::string password);
-    std::string addUser(std::string username, std::string password,
+    bool addUser(std::string username, std::string password,
                          int balance, std::string phone, std::string addr);
     void setToken(std::string username);
     std::string userLoggedIn(std::string username);
     bool userLoggedOut(std::string token);
-    bool isLoggedIn(std::string token);
+    bool isLoggedIn(std::string username);
     UserRole getRole(std::string token);
     void printINfo();
     bool reduceBalance(std::string token, int price);
+    bool editInformation(std::string token, std::string new_pass, std::string phone="", std::string addr="");
 };
 
 
