@@ -94,3 +94,5 @@ int main(int argc, char *argv[]){
     google::ShutdownGoogleLogging();
     return 0;
 }
+
+// TODO: having a mechanism to automatically logout user, when client is terminated

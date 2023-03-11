@@ -19,6 +19,7 @@ serverConfig get_server_config(std::string path) {
 std::string command::diagnose(std::string command) {
     json json_data_in = json::parse(command);
     // TODO: parse command regarding 'kind'
+    //  also, update arguments of this function
 
 }
 
@@ -45,4 +46,10 @@ std::string command::signup(json& j, UserManager& um) {
 
     auto succeeded = um.signup(username, pass, ba, pn, addr);
     // TODO:  503 on error and 231 for success
+}
+
+std::string command::logout(json &j_in, UserManager &um) {
+    std::string token = j_in["token"];
+    auto succeeded = um.logout(token);
+    // TODO: 201 on success
 }
