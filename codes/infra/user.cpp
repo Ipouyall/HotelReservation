@@ -99,6 +99,12 @@ int UserManager::create_Id(){
 
 bool UserManager::signup(std::string username, std::string password,
                          int balance, std::string phone, std::string addr){
+    if(username == "" || password == "" || addr == "")
+        return false;
+    // valid phones:
+    // 09123456789, +989123456789
+    if(phone.size() != 11 && phone.size() != 13)
+        return false;
     if(username_exist(username))
         return false;
     UserData new_user;

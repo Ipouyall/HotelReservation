@@ -10,6 +10,7 @@ Now we describe it;s methods:
 - `username_exist`: Check that if username give exist in users(`return true`) or not (`return false`).
 - `user_validation`: Check that password given is equal to password saved for username given.
 - `signup`: Add new user to users based on information given and return true if successfully done.
+    also check if username or address are not *null* and phone number is valid.
 - `login`: Change `is_logged_in` atrribute to `true` , set token and then return it for user based on username given.
 - `logout`: Change `is_logged_in` atrribute to `false` , clear token and then return `true` if successfully done.
 - `get_role`: Return role of user based on token given.

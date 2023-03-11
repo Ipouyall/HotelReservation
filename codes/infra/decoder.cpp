@@ -2,6 +2,7 @@
 
 std::string decode::sign_in(std::string& username, std::string& password){
     json j;
+    j["kind"] = "sign_in";
     j["username"] = username;
     j["password"] = password;
     return j.dump();
