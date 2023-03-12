@@ -17,6 +17,7 @@ private:
     std::string username;
     std::string token;
     std::string last_response;
+    bool is_server_up;
 
 public:
     Command();
@@ -25,7 +26,7 @@ public:
     std::string get_last_response();
 
 private:
-    char** initial_state_command_completion(const char* text, int start, int end);
+    static char** initial_state_command_completion(const char* text, int start, int end);
     void initial_state_execute_command(const std::string& cmd, int server_fd);
 };
 

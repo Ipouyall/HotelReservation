@@ -14,6 +14,13 @@ void show_simple_json(json j){
     "\033[0m" << std::endl;
 }
 
+Command::Command() {
+    username="";
+    token="";
+    last_response="";
+    is_server_up=true;
+}
+
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {"signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-"};
     const char* prefix = rl_line_buffer;
@@ -87,11 +94,16 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
             std::cerr << "Wrong command format!" << std::endl;
             return;
         }
-        std::string request = decode::check_username_is_free(username);
+        std::string request = decode::check_username_is_free(username), resp;
         bool sent = send_message(server_fd, request);
         if (!sent)
             return;
-        // TODO: get response and act due to that
+        is_server_up = receive_data(server_fd,resp);
+        json j = json::parse(resp);
+        if (j["kind"]=="error"){
+            show_simple_json(j);
+            return;
+        }
         std::cout << "password: ";
         std::cin >> password;
         std::cout << "purse: ";
@@ -103,7 +115,9 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
         sent = send_message(server_fd, request);
         if (!sent)
             return;
-        // TODO: get response and act due to that
+        is_server_up = receive_data(server_fd,resp);
+        j = json::parse(resp);
+        show_simple_json(j);
     }
     else
     {
@@ -112,23 +126,15 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
     }
 }
 
-//int main() {
-//    // Set the command completion function
-//    rl_attempted_completion_function = (CPPFunction*)command_completion;
-//
-//    // Read commands from the user
-//    char* input = nullptr;
-//    while ((input = readline("> ")) != nullptr) {
-//        // Add the input to the history
-//        add_history(input);
-//
-//        // Execute the command
-//        std::string command(input);
-//        execute_command(command);
-//
-//        // Free the input buffer
-//        free(input);
-//    }
-//
-//    return 0;
-//}
+void Command::initial_menu(const std::string &cmd, int server_fd) {
+    rl_attempted_completion_function = (CPPFunction*)initial_state_command_completion;
+    char* input = nullptr;
+    if((input = readline("> ")) == nullptr) {
+        LOG(ERROR) << "Couldn't read user prompt";
+        return;
+    }
+    add_history(input);
+    std::string command(input);
+//    initial_state_execute_command(command, server_fd);
+    free(input);
+}

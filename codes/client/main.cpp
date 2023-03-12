@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
+#include "../front/cli.h"
 
 using namespace std;
 
@@ -59,6 +60,8 @@ int main(int argc, char const *argv[]) {
 
     auto server_info = get_server_config(DEFAULT_SERVER_PATH);
     int sockfd = connect_to_server(server_info);
+    auto cmd = Command();
+
 
     std::string buffer;
 
@@ -68,16 +71,18 @@ int main(int argc, char const *argv[]) {
     FD_SET(STDIN_FILENO, &master_set);
 
     while (true) {
+        cmd.initial_menu(buffer, sockfd); // TODO: has more functionality
         working_set = master_set;
         select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
 
         for (int i = 0; i < FD_SETSIZE; i++) {
             if (FD_ISSET(i, &working_set)) {
-                if (i == STDIN_FILENO) { // input from stdin
-                    std::cin >> buffer;
-                    send_message(sockfd, buffer);
-                }
-                else if (i == sockfd) { // sth from server is reached
+//                if (i == STDIN_FILENO) { // input from stdin
+//                    std::cin >> buffer;
+//                    send_message(sockfd, buffer);
+//                }
+//                else
+                    if (i == sockfd) { // sth from server is reached
                     buffer = "";
                     bool is_up = receive_data(sockfd, buffer);
                     if (!is_up) { // when server is down
