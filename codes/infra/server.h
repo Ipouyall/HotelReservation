@@ -18,7 +18,7 @@ serverConfig get_server_config(std::string path);
 
 namespace command {
     std::string diagnose(std::string command);
-    std::string sign_in(json& j_in, UserManager& um, int fd);
+    std::string sign_in(json& j_in, UserManager& um, int fd
     std::string signup(json& j_in, UserManager& um);
     std::string logout(json& j_in, UserManager& um);
     std::string view_user_information(); // TODO: implement dependency
