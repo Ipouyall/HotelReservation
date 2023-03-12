@@ -8,6 +8,7 @@
 using json = nlohmann::json;
 
 #define DEFAULT_SERVER_PATH "./config/config.json"
+#define DEFAULT_ERRORS_PATH "./config/Errors.json"
 
 typedef struct serverConfig {
     std::string host_name;
@@ -16,10 +17,20 @@ typedef struct serverConfig {
 
 serverConfig get_server_config(std::string path);
 
-json server_response(std::string kind, std::string status_code, std::string status, std::string msg="");
 
-namespace command {
-    std::string diagnose(std::string command);
+class Server{
+private:
+    serverConfig config;
+    json errors;
+    int fd;
+
+public:
+    Server();
+    int get_fd();
+    std::string diagnose(std::string command, UserManager& um, int client_fd);
+
+private:
+    json response(std::string kind, std::string status_code, std::string status, std::string msg);
     std::string sign_in(json& j_in, UserManager& um, int fd);
     std::string signup(json& j_in, UserManager& um);
     std::string logout(json& j_in, UserManager& um);
@@ -35,6 +46,6 @@ namespace command {
     std::string add_a_room(); // TODO: implement dependency
     std::string modify_a_room(); // TODO: implement dependency
     std::string remove_a_room(); // TODO: implement dependency
-}
+};
 
 #endif //SRC_SERVER_H

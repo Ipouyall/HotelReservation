@@ -51,9 +51,9 @@ int main(int argc, char *argv[]){
     char buffer[1024];
     std::string bufferString;
     fd_set master_set, working_set;
-    auto server_info = get_server_config(DEFAULT_SERVER_PATH);
+    auto server = Server();
 
-    server_fd = setupServer(server_info.host_name.c_str(), server_info.port);
+    server_fd = server.get_fd();
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
