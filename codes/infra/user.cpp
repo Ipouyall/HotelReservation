@@ -190,6 +190,8 @@ bool UserManager::increase_balance(std::string token, int amount){
 
 bool UserManager::edit_information(std::string token, std::string new_pass, 
                                     std::string phone="", std::string addr=""){
+    if(new_pass == "")
+        return false;
     int index = search_by_token(token);
     if(index != -1){
         users[index].password = new_pass;
