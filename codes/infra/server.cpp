@@ -32,7 +32,11 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
     std::string cmd = json_data_in["kind"];
     std:: string rsp;
     if(cmd == "sign_in")
-            rsp = sign_in(json_data_in, um, client_fd);
+        rsp = sign_in(json_data_in, um, client_fd);
+    else if(cmd == "sign_up")
+        rsp = signup(json_data_in, um);
+    else if(cmd == "logout")
+        rsp = logout(json_data_in, um);
     return rsp;
 }
 
@@ -99,8 +103,8 @@ std::string Server::logout(json &j_in, UserManager &um) {
     LOG(INFO) << "Logout request received";
     std::string token = j_in["token"];
     auto succeeded = um.logout(token);
-    // TODO: 201 on success
     json rsp;
+
     rsp = response("success", "201", "Hope to see you later!");
     return rsp.dump();
 }
