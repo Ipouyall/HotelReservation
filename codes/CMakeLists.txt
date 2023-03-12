@@ -40,6 +40,9 @@ add_executable(hr_test
         infra/socketUtils.cpp
         infra/saveLog.cpp
         infra/dateManager.cpp)
+        infra/decoder.cpp
+        infra/encoder.cpp
+        )
 add_executable(hr_server
         server/main.cpp
         infra/filehandler.cpp
@@ -49,6 +52,9 @@ add_executable(hr_server
         infra/socketUtils.cpp
         infra/saveLog.cpp
         infra/dateManager.cpp)
+        infra/decoder.cpp
+        infra/encoder.cpp
+        )
 add_executable(hr_client
         client/main.cpp
         infra/filehandler.cpp

@@ -12,10 +12,14 @@ On macos, run:
 brew install cmake
 ```
 
+```shell
+arch -arm64 brew install openssl
+```
+
 For linux:
 
 ```shell
-sudo apt-get install cmake
+sudo apt-get install cmake openssl
 ```
 
 ### 02. Generate Makefile

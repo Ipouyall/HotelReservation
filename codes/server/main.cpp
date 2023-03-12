@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
                         continue;
                     }
 
-                    std::cout << "client fd = " << i << " said = " << buffer;
+                    std::cout << "client fd = " << i << " said = " << buffer << std::endl;
 
                     std::string response = "ok";
                     if(send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
@@ -94,3 +94,5 @@ int main(int argc, char *argv[]){
     google::ShutdownGoogleLogging();
     return 0;
 }
+
+// TODO: having a mechanism to automatically logout user, when client is terminated

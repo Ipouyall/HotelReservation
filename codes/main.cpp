@@ -33,13 +33,41 @@ int main(int argc, char **argv) { // using just for test functionalities
 
     auto h = get_hotel_information(DEFAULT_HOTEL_PATH);
     for (auto _h : h){
-        cout << _h.room_number << ' ' << _h.max_capacity - _h.current_capacity << endl;
+        std::cout << _h.room_number << ' ' << _h.max_capacity - _h.current_capacity << std::endl;
     }
 
     auto u = get_users_data(DEFAULT_USERS_PATH);
     for (auto _u:u){
-        cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << endl;
+        std::cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << std::endl;
     }
+
+    std::cout << "Token1: " << generate_token() << std::endl;
+    std::cout << "Token2: " << generate_token() << std::endl;
+
+    UserManager manager;
+
+
+    std::cout << "before insertion" << std::endl;
+    manager.printINfo();
+
+    manager.signup("sfdgdfgffd", "pokopkp54", 50, "0912235222", "werw street, ookok valley");
+    std::string token = manager.login("sfdgdfgffd", 4);
+    manager.reduce_balance(token, 20);
+
+    std::cout << "after insertion" << std::endl;
+
+    manager.printINfo();
+
+
+    HotelManager h_manager;
+    h_manager.print_info();
+
+
+
+
+
+
+    sleep(10);
 
     using namespace date;
     std::cout << weekday{July/5/2001} << '\n';
