@@ -16,21 +16,39 @@ serverConfig get_server_config(std::string path) {
     return conf;
 }
 
-std::string command::diagnose(std::string command) {
+std::string command::diagnose(std::string command, UserManager& um, int client_fd) {
     json json_data_in = json::parse(command);
-    // TODO: parse command regarding 'kind'
-    //  also, update arguments of this function
+    // TODO: update arguments of this function
+    std::string command = json_data_in["kind"];
+    std:: string response;
+    switch(command){
+        case("sign_in"):
+        response = sign_in(json_data_in, um, client_fd);
+        break;
+    } 
 
+}
+
+json server_response(std::string kind, std::string status_code, std::string status, std::string token, std::string msg){
+    json rsp;
+    rsp["kind"] = kind;
+    rsp["status_code"] = status_code;
+    rsp["status"] = status;
+    rsp["message"] = msg;
+    return rsp;
 }
 
 std::string command::sign_in(json& j_in, UserManager& um, int fd){
     std::string username = j_in["username"];
     std::string password = j_in["password"];
-    if (!um.user_validation(username, password)) {
-        // TODO: signup failed, error => 430
-    }
+    if (!um.user_validation(username, password)) 
+        return server_response(
+            "error", "430", "Invalid username or password.", "", "Sign_in failed due to invalid pass os uname."
+        );
     std::string token = um.login(username, fd);
-    // TODO: on success, return 230 and token
+    return server_response(
+        "success", "230", "User logged in.", token, "You logged in successfully"
+    );
 }
 
 std::string command::signup(json& j, UserManager& um) {
