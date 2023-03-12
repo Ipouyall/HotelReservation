@@ -64,6 +64,9 @@ add_executable(hr_client
         infra/socketUtils.cpp
         infra/saveLog.cpp
         infra/dateManager.cpp)
+        infra/decoder.cpp
+        infra/encoder.cpp
+        )
 target_link_libraries(hr_test nlohmann_json glog::glog date)
 target_link_libraries(hr_server nlohmann_json glog::glog date)
 target_link_libraries(hr_client nlohmann_json glog::glog date)
