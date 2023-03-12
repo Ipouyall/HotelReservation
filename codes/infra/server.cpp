@@ -29,7 +29,8 @@ std::string command::diagnose(std::string command, UserManager& um, int client_f
 
 }
 
-json server_response(std::string kind, std::string status_code, std::string status, std::string token, std::string msg){
+json server_response(std::string kind, std::string status_code, std::string msg){
+    // TODO: read error file and set status from that; also add server class to initialize data
     json rsp;
     rsp["kind"] = kind;
     rsp["status_code"] = status_code;
@@ -41,18 +42,23 @@ json server_response(std::string kind, std::string status_code, std::string stat
 std::string command::sign_in(json& j_in, UserManager& um, int fd){
     std::string username = j_in["username"];
     std::string password = j_in["password"];
+    json response;
     if (!um.user_validation(username, password)) 
-        return server_response(
-            "error", "430", "Invalid username or password.", "", "Sign_in failed due to invalid pass os uname."
+        response = server_response(
+            "error", "430", "Invalid username or password.", "Sign_in failed due to invalid pass os uname."
         );
-    std::string token = um.login(username, fd);
-    return server_response(
-        "success", "230", "User logged in.", token, "You logged in successfully"
-    );
+    else {
+        std::string token = um.login(username, fd);
+        response = server_response(
+                "success", "230", "You logged in successfully"
+        );
+        response["token"] = token;
+    }
+    return response.dump();
 }
 
 std::string command::signup(json& j, UserManager& um) {
-    // TODO: in prev stage before calling this,
+    // TODO: client, after validating username is free, should again send uname,
     //      we have to store username and inject in here
     //      and check if user exists(error => 451) o.w. (311)
 
@@ -61,9 +67,12 @@ std::string command::signup(json& j, UserManager& um) {
     int ba = j["balance"];
     std::string pn = j["phone"];
     std::string addr = j["addr"];
+    json response;
 
     auto succeeded = um.signup(username, pass, ba, pn, addr);
-    // TODO:  503 on error and 231 for success
+    if(succeeded)
+        response = server_response("success", "")
+
 }
 
 std::string command::logout(json &j_in, UserManager &um) {

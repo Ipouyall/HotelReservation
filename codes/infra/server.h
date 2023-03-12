@@ -16,7 +16,7 @@ typedef struct serverConfig {
 
 serverConfig get_server_config(std::string path);
 
-json server_response(std::string kind, std::string status_code, std::string status, std::string token="", std::string msg="");
+json server_response(std::string kind, std::string status_code, std::string status, std::string msg="");
 
 namespace command {
     std::string diagnose(std::string command);
