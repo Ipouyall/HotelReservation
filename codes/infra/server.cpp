@@ -30,13 +30,10 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
     json json_data_in = json::parse(command);
     // TODO: update arguments of this function
     std::string cmd = json_data_in["kind"];
-    std:: string response;
-    switch(cmd){
-        case("sign_in"):
-        response = sign_in(json_data_in, um, client_fd);
-        break;
-    } 
-    return response;
+    std:: string rsp;
+    if(cmd == "sign_in")
+            rsp = sign_in(json_data_in, um, client_fd);
+    return rsp;
 }
 
 json Server::response(std::string kind, std::string status_code, std::string msg){
@@ -53,10 +50,10 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
     LOG(INFO) << "Login request received on (" << fd << ")";
     std::string username = j_in["username"];
     std::string password = j_in["password"];
-    json response;
+    json rsp;
     if (!um.user_validation(username, password))
     {
-        response = response(
+        rsp = response(
                 "error", "430", "Sign_in failed due to invalid pass os uname."
         );
         LOG(WARNING) << "Login request from (" << fd << ") failed!";
@@ -64,13 +61,13 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
     else
     {
         std::string token = um.login(username, fd);
-        response =  response(
+        rsp =  response(
                 "success", "230", "You logged in successfully"
         );
-        response["token"] = token;
+        rsp["token"] = token;
         LOG(INFO) << "Login request from (" << fd << ") succeeded.";
     }
-    return response.dump();
+    return rsp.dump();
 }
 
 std::string Server::signup(json& j, UserManager& um) {
@@ -81,20 +78,20 @@ std::string Server::signup(json& j, UserManager& um) {
     int ba = j["balance"];
     std::string pn = j["phone"];
     std::string addr = j["addr"];
-    json response;
+    json rsp;
 
     auto succeeded = um.signup(username, pass, ba, pn, addr);
     if(succeeded)
     {
         LOG(INFO) << "User signed up successfully";
-        response = response("success", "311", "We honor to announce you are part of our community from now on.");
+        rsp = response("success", "311", "We honor to announce you are part of our community from now on.");
     }
     else
     {
         LOG(WARNING) << "User signup failed";
-        response = response("error", "451", "Signing up failed, make sure you entered valid data.");
+        rsp = response("error", "451", "Signing up failed, make sure you entered valid data.");
     }
-    return response.dump();
+    return rsp.dump();
 }
 
 std::string Server::logout(json &j_in, UserManager &um) {
@@ -103,7 +100,7 @@ std::string Server::logout(json &j_in, UserManager &um) {
     std::string token = j_in["token"];
     auto succeeded = um.logout(token);
     // TODO: 201 on success
-    json response;
-    response = response("success", "201", "Hope to see you later!");
-    return response.dump();
+    json rsp;
+    rsp = response("success", "201", "Hope to see you later!");
+    return rsp.dump();
 }

@@ -30,7 +30,7 @@ public:
     std::string diagnose(std::string command, UserManager& um, int client_fd);
 
 private:
-    json response(std::string kind, std::string status_code, std::string status, std::string msg);
+    json response(std::string kind, std::string status_code, std::string msg);
     std::string sign_in(json& j_in, UserManager& um, int fd);
     std::string signup(json& j_in, UserManager& um);
     std::string logout(json& j_in, UserManager& um);
