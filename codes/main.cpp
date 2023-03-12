@@ -56,6 +56,12 @@ int main(int argc, char **argv) { // using just for test functionalities
     manager.printINfo();
 
 
+    HotelManager h_manager;
+    h_manager.print_info();
+
+
+
+
 
 
     sleep(10);
