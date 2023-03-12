@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "client.h"
 
 std::string decode::sign_in(std::string& username, std::string& password){
     json j;
@@ -148,4 +148,8 @@ std::string decode::logout(std::string& token){
     j["kind"] = "logout";
     j["token"] = token;
     return j.dump();
+}
+
+bool encode::is_username_available(std::string &response) {
+
 }

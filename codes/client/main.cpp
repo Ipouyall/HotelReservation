@@ -15,8 +15,6 @@
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
 
-#define BUFFER_SIZE 1024
-
 using namespace std;
 
 int connect_to_server(serverConfig& server_info, int max_attempts=10) {
@@ -44,20 +42,25 @@ void signalHandler(int signum) {
     exit(0);
 }
 
-int main(int argc, char const *argv[]) {
-    google::InitGoogleLogging(argv[0]);
+void setUP_client(char const * name) {
+    google::InitGoogleLogging(name);
     google::InstallFailureSignalHandler();
+    FLAGS_minloglevel=0;
     FLAGS_colorlogtostderr = true;
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
     LOG(INFO) << "Initializing Client...";
     signal(SIGINT, signalHandler);
+}
+
+int main(int argc, char const *argv[]) {
+    setUP_client(argv[0]);
 
     auto server_info = get_server_config(DEFAULT_SERVER_PATH);
     int sockfd = connect_to_server(server_info);
 
-    char buffer[BUFFER_SIZE];
+    std::string buffer;
 
     fd_set master_set, working_set;
     FD_ZERO(&master_set);
@@ -71,19 +74,13 @@ int main(int argc, char const *argv[]) {
         for (int i = 0; i < FD_SETSIZE; i++) {
             if (FD_ISSET(i, &working_set)) {
                 if (i == STDIN_FILENO) { // input from stdin
-                    memset(buffer, 0, BUFFER_SIZE);
-                    read(STDIN_FILENO, buffer, BUFFER_SIZE);
-                    buffer[strlen(buffer)-1] = '\0';
-
-                    if(send(sockfd, buffer, strlen(buffer), 0) != -1)
-                        LOG(INFO) << "Your response sent to server.";
-                    else
-                        LOG(ERROR) << "Error on sending your message to the server!";
+                    std::cin >> buffer;
+                    send_message(sockfd, buffer);
                 }
                 else if (i == sockfd) { // sth from server is reached
-                    memset(buffer, 0, BUFFER_SIZE);
-                    int bytes_received = recv(sockfd , buffer, BUFFER_SIZE, 0);
-                    if (bytes_received == 0) { // recovering server when server is down
+                    buffer = "";
+                    bool is_up = receive_data(sockfd, buffer);
+                    if (!is_up) { // when server is down
                         close(sockfd);
                         FD_CLR(sockfd, &master_set);
                         LOG(WARNING) << "Server is Down";

@@ -24,6 +24,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glog)
 include_directories(${glog_SOURCE_DIR}/src)
 
+find_library(LIBEDIT_LIBRARY edit)
+
 add_executable(hr_test
         main.cpp
         infra/filehandler.cpp
@@ -32,8 +34,7 @@ add_executable(hr_test
         infra/user.cpp
         infra/socketUtils.cpp
         infra/saveLog.cpp
-        infra/decoder.cpp
-        infra/encoder.cpp
+        infra/client.cpp
         )
 add_executable(hr_server
         server/main.cpp
@@ -43,8 +44,7 @@ add_executable(hr_server
         infra/user.cpp
         infra/socketUtils.cpp
         infra/saveLog.cpp
-        infra/decoder.cpp
-        infra/encoder.cpp
+        infra/client.cpp
         )
 add_executable(hr_client
         client/main.cpp
@@ -54,10 +54,10 @@ add_executable(hr_client
         infra/user.cpp
         infra/socketUtils.cpp
         infra/saveLog.cpp
-        infra/decoder.cpp
-        infra/encoder.cpp
+        infra/client.cpp
+        front/cli.cpp
         )
         
-target_link_libraries(hr_test nlohmann_json glog::glog)
+target_link_libraries(hr_test nlohmann_json glog::glog ${LIBEDIT_LIBRARY})
 target_link_libraries(hr_server nlohmann_json glog::glog)
-target_link_libraries(hr_client nlohmann_json glog::glog)
+target_link_libraries(hr_client nlohmann_json glog::glog ${LIBEDIT_LIBRARY})

@@ -48,7 +48,6 @@ int main(int argc, char *argv[]){
 
     std::vector<Client> clients;
     int server_fd, new_socket, max_sd;
-    char buffer[1024];
     std::string bufferString;
     fd_set master_set, working_set;
     auto server = Server();
@@ -71,16 +70,16 @@ int main(int argc, char *argv[]){
                     add_new_client(clients, new_socket);
                 }
                 else {
-                    memset(buffer, 0, 1024);
-                    int bytes_received = recv(i , buffer, 1024, 0);
-                    if (bytes_received == 0) { // Client has left
+                    bufferString = "";
+                    bool is_up = receive_data(i, bufferString);
+                    if (!is_up) { // Client has left
                         close(i);
                         FD_CLR(i, &master_set);
                         LOG(INFO) << "Client gone";
                         continue;
                     }
 
-                    std::cout << "client fd = " << i << " said = " << buffer << std::endl;
+                    std::cout << "client fd = " << i << " said = " << bufferString << std::endl;
 
                     std::string response = "ok";
                     if(send(i, response.c_str(), strlen(response.c_str()), 0) != -1)

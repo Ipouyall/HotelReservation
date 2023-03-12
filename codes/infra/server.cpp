@@ -33,6 +33,8 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
     std:: string rsp;
     if(cmd == "sign_in")
         rsp = sign_in(json_data_in, um, client_fd);
+    else if(cmd == "free_username")
+        rsp = is_uname_available(json_data_in, um);
     else if(cmd == "sign_up")
         rsp = signup(json_data_in, um);
     else if(cmd == "logout")
@@ -70,6 +72,25 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
         );
         rsp["token"] = token;
         LOG(INFO) << "Login request from (" << fd << ") succeeded.";
+    }
+    return rsp.dump();
+}
+
+std::string Server::is_uname_available(json &j_in, UserManager &um) {
+    LOG(INFO) << "Checking username is available";
+    std::string username = j_in["username"];
+    bool available = !um.username_exist(username);
+    json rsp;
+
+    if (available)
+    {
+        rsp = response("success", "000", "Just validated you username, please complete your registration");
+        LOG(INFO) << "Username is available";
+    }
+    else
+    {
+        rsp = response("error", "451", "Username exists, try another one.");
+        LOG(WARNING) << "Username is available";
     }
     return rsp.dump();
 }

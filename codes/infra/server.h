@@ -33,6 +33,7 @@ private:
     json response(std::string kind, std::string status_code, std::string msg);
     std::string sign_in(json& j_in, UserManager& um, int fd);
     std::string signup(json& j_in, UserManager& um);
+    std::string is_uname_available(json& j_in, UserManager& um);
     std::string logout(json& j_in, UserManager& um);
     std::string view_user_information(); // TODO: implement dependency
     std::string view_all_users(); // TODO: implement dependency
