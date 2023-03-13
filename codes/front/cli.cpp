@@ -7,11 +7,12 @@
 #include "../infra/socketUtils.h"
 #include <glog/logging.h>
 #include <sstream>
+#include <iostream>
 
 void show_simple_json(json j){
-    std::cout << (j["kind"] == "error" ? "\033[1;31m" : "" )
-    << j["status_code"] << ":" << j["status"] << "\n:::" << j["message"] <<
-    "\033[0m" << std::endl;
+    std::cout << (j["kind"] == "error" ? "\033[1;31m" : "" ) <<
+    j["status_code"] << ":" << j["status"] << "\n:::" <<
+    j["message"] << "\033[0m" << std::endl;
 }
 
 Command::Command() {
@@ -19,10 +20,13 @@ Command::Command() {
     token="";
     last_response="";
     is_server_up=true;
+    logged_in=false;
 }
 
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
-    static std::vector<std::string> commands = {"signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-"};
+    static std::vector<std::string> commands = {
+            "signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-"
+    };
     const char* prefix = rl_line_buffer;
     std::vector<std::string> matches;
 
@@ -48,7 +52,7 @@ char** Command::initial_state_command_completion(const char* text, int start, in
 }
 
 // Command execution function
-void Command::initial_state_execute_command(const std::string& cmd, int server_fd) {
+void Command::initial_state_execute_command(const std::string& cmd, int server_fd) { // TODO rsp should change to last_response
     std::string help_prompt = "You haven't authorized yet, try following:\n";
     help_prompt += "- signin <username> <password>\n";
     help_prompt += "- signup <username>\n";
@@ -86,7 +90,7 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
     else if (command == "signup")
     {
         LOG(INFO) << "Signup menu...";
-        std::string username, password, phone, address;
+        std::string password, phone, address;
         int balance;
         stream >> username;
         if (username == "signup")
@@ -118,6 +122,30 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
         is_server_up = receive_data(server_fd,resp);
         j = json::parse(resp);
         show_simple_json(j);
+    }
+    else if (command == "signin")
+    {
+        std::string pass;
+        stream >> username;
+        if (username == "signin")
+        {
+            std::cerr << "Wrong command format!" << std::endl;
+            return;
+        }
+        stream >> pass;
+        std::string request = decode::sign_in(username, pass), resp;
+        LOG(INFO) << "Sending login data...";
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,resp);
+        json j = json::parse(resp);
+        show_simple_json(j);
+        if (j["kind"]=="error"){
+            return;
+        }
+        token = j["token"];
+        logged_in=true;
     }
     else
     {

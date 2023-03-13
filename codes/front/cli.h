@@ -17,6 +17,7 @@ private:
     std::string username;
     std::string token;
     std::string last_response;
+    bool logged_in;
     bool is_server_up;
 
 public:
