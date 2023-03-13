@@ -55,6 +55,7 @@ void setUP_client(char const * name) {
     signal(SIGINT, signalHandler);
 }
 
+// TODO: change cli sucj that we just use its autocompletion and disabling other features
 int main(int argc, char const *argv[]) {
     setUP_client(argv[0]);
 
@@ -71,34 +72,37 @@ int main(int argc, char const *argv[]) {
     FD_SET(STDIN_FILENO, &master_set);
 
     while (true) {
-        cmd.initial_menu(buffer, sockfd); // TODO: has more functionality
+        cmd.activate_initial_menu(); // TODO: has more functionality
         working_set = master_set;
-        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
+//        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
 
         for (int i = 0; i < FD_SETSIZE; i++) {
-            if (FD_ISSET(i, &working_set)) {
-//                if (i == STDIN_FILENO) { // input from stdin
+            if (!FD_ISSET(i, &working_set))
+                continue;
+            if (i == STDIN_FILENO)
+            { // input from stdin
+                cmd.execute_initial_menu(sockfd);
 //                    std::cin >> buffer;
 //                    send_message(sockfd, buffer);
-//                }
-//                else
-                    if (i == sockfd) { // sth from server is reached
-                    buffer = "";
-                    bool is_up = receive_data(sockfd, buffer);
-                    if (!is_up) { // when server is down
-                        close(sockfd);
-                        FD_CLR(sockfd, &master_set);
-                        LOG(WARNING) << "Server is Down";
-                        sockfd = connect_to_server(server_info);
-                        FD_SET(sockfd, &master_set);
-                        continue;
-                    }
-                    LOG(INFO) << "Server response: " << buffer;
-                }
-                else {
-                    LOG(WARNING) << "Unknown file descriptor: " << i ;
-                }
             }
+            else if (i == sockfd)
+            { // sth from server is reached
+                buffer = "";
+                bool is_up = receive_data(sockfd, buffer);
+                if (!is_up)
+                { // when server is down
+                    close(sockfd);
+                    FD_CLR(sockfd, &master_set);
+                    LOG(WARNING) << "Server is Down";
+                    sockfd = connect_to_server(server_info);
+                    FD_SET(sockfd, &master_set);
+                    continue;
+                }
+                LOG(INFO) << "Server response: " << buffer;
+            }
+            else
+                LOG(WARNING) << "Unknown file descriptor: " << i;
+
         }
     }
     google::ShutdownGoogleLogging();

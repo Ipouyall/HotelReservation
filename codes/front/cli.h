@@ -21,7 +21,8 @@ private:
 
 public:
     Command();
-    void initial_menu(const std::string& cmd, int server_fd);
+    void activate_initial_menu();
+    void execute_initial_menu(int server_fd);
     std::string get_token();
     std::string get_last_response();
 

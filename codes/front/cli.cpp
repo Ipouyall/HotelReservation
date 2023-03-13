@@ -126,10 +126,16 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
     }
 }
 
-void Command::initial_menu(const std::string &cmd, int server_fd) {
+void Command::activate_initial_menu() {
+    LOG(INFO) << "Initial menu is activating...";
     rl_attempted_completion_function = (CPPFunction*)initial_state_command_completion;
+//    std::cout << "> ";
+}
+
+void Command::execute_initial_menu(int server_fd) {
+    LOG(INFO) << "Executing initial menu";
     char* input = nullptr;
-    if((input = readline("> ")) == nullptr) {
+    if((input = readline("")) == nullptr) {
         LOG(ERROR) << "Couldn't read user prompt";
         return;
     }
