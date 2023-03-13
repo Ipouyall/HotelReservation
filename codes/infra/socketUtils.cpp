@@ -124,7 +124,7 @@ bool receive_data(int sockfd, std::string& received) {
     if (bytes_received < 0) { // error occurred
         LOG(ERROR) << "Error receiving data";
         delete[] buffer;
-        return true;
+        return false;
     } else if (bytes_received == 0) { // server is down
         delete[] buffer;
         return false;

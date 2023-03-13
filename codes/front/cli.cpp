@@ -20,6 +20,10 @@ Command::Command() {
     logged_in=false;
 }
 
+bool Command::is_server_still_up() {
+    return is_server_up;
+}
+
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {
             "signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
@@ -127,15 +131,14 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     {
         LOG(INFO) << "Signin menu...";
         add_history(command.c_str());
-        std::string pass;
         stream >> username;
         if (username == "signin")
         {
             std::cerr << "Wrong command format!" << std::endl;
             return;
         }
-        stream >> pass;
-        std::string request = decode::sign_in(username, pass);
+        stream >> password;
+        std::string request = decode::sign_in(username, password);
         LOG(INFO) << "Sending login data...";
         bool sent = send_message(server_fd, request);
         if (!sent)
@@ -160,6 +163,27 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     }
 }
 
+void Command::recover_state(int server_fd) {
+    if (!logged_in)
+        return;
+    LOG(INFO) << "Recovering client's state...";
+    std::string request = decode::sign_in(username, password);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    std::string srv_response;
+    is_server_up = receive_data(server_fd,srv_response);
+    json j = json::parse(srv_response);
+    if (j["kind"]=="error"){
+        LOG(ERROR) << "Couldn't recover previous state!";
+        logged_in=false;
+        token="";
+        return;
+    }
+    token = j["token"];
+    logged_in=true;
+}
+
 void Command::activate_autocompletion() {
     if (logged_in)
     {
@@ -176,10 +200,7 @@ void Command::activate_autocompletion() {
         prompt += "8. Leaving room\n";
         prompt += "9. Rooms\n";
         prompt += "0. Logout\n";
-        prompt += "+ clear\n";
-        prompt += "+ exit\n";
-        prompt += "+ quit\n";
-        prompt += "+ help";
+        prompt += "+ clear/exit/quit/help";
         std::cout << prompt << std::endl;
     }
     else {
@@ -291,7 +312,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         is_server_up = receive_data(server_fd,last_response);
         json j = json::parse(last_response);
         show_simple_json(j);
-        json ud = json::parse(j["data"]);
+        std::string udata = j["data"];
+        json ud = json::parse(udata);
         if(j["kind"]=="success")
             print_user_info(ud);
     }
@@ -302,21 +324,23 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     }
 }
 
-template<typename T> void print_element(T t, const int& width)
+template<typename T>
+void print_element(T t, const int& width)
 {
     std::cout << std::left << std::setw(width) << std::setfill(' ') << t;
 }
 
 void print_user_info(json user_data){
     std::cout<< "User account's information:" << std::endl;
-    print_element(user_data["id"], 5);
-    print_element(user_data["username"], 15);
-    print_element(user_data["role"], 6);
-    if (user_data.contains("purse"))
-        print_element(user_data["purse"], 10);
-    if (user_data.contains("phone number"))
-        print_element(user_data["phone number"], 14);
-    if (user_data.contains("address"))
-        print_element(user_data["address"], 25);
-    std::cout << std::endl;
+    std::string valid_rows[] = {
+            "id", "username", "role", "purse","phone number", "address"
+    };
+    for (auto& key : valid_rows) {
+        if (!user_data.contains(key))
+            continue;
+        print_element(key, 10);
+        print_element(":", 2);
+        print_element(user_data[key], 30);
+        std::cout << std::endl;
+    }
 }

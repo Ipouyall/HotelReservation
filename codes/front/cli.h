@@ -15,6 +15,7 @@ using json = nlohmann::json;
 class Command{
 private:
     std::string username;
+    std::string password;
     std::string token;
     std::string last_response;
     bool logged_in;
@@ -26,6 +27,8 @@ public:
     void execute_command(std::string command, int server_fd);
     std::string get_token();
     std::string get_last_response();
+    void recover_state(int server_fd);
+    bool is_server_still_up();
 
 private:
     static char** initial_state_command_completion(const char* text, int start, int end);

@@ -231,7 +231,7 @@ std::string UserManager::get_user_data(std::string token) {
     j["id"] = user.id;
     j["username"] = user.username;
     j["role"] = user.privilege ? "admin" : "user";
-    if (!user.privilege)
+    if (user.privilege)
         return j.dump();
     j["purse"] = user.account_balance;
     j["phone number"] = user.phone_number;

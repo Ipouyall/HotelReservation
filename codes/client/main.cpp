@@ -55,12 +55,26 @@ void setUP_client(char const * name) {
     signal(SIGINT, signalHandler);
 }
 
+bool is_data_available(int fd, fd_set& fs) {
+    struct timeval timeout = {0, 0};      // Set the timeout to zero for non-blocking select
+
+    int ret = select(fd + 1, &fs, NULL, NULL, &timeout);
+    if (ret == -1) {
+        std::cerr << "Error: select() failed." << std::endl;
+        return false;
+    } else if (ret == 0) {
+        return false;                     // No data available
+    }
+    return true;                      // Data available
+}
+
 // TODO: change cli sucj that we just use its autocompletion and disabling other features
 int main(int argc, char const *argv[]) {
     setUP_client(argv[0]);
 
     auto server_info = get_server_config(DEFAULT_SERVER_PATH);
     int sockfd = connect_to_server(server_info);
+    bool is_server_up = true;
     auto cmd = Command();
 
 
@@ -70,12 +84,23 @@ int main(int argc, char const *argv[]) {
     FD_ZERO(&master_set);
     FD_SET(sockfd, &master_set);
     FD_SET(STDIN_FILENO, &master_set);
+    cmd.activate_autocompletion();
 
     while (true) {
-        cmd.activate_autocompletion();
+        if (!is_server_up)
+        { // when server is down
+            close(sockfd);
+            FD_CLR(sockfd, &master_set);
+            LOG(WARNING) << "Server is Down";
+            sockfd = connect_to_server(server_info);
+            FD_SET(sockfd, &master_set);
+            cmd.recover_state(sockfd);
+            is_server_up = true;
+            continue;
+        }
+
         working_set = master_set;
 //        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
-
         for (int i = 0; i < FD_SETSIZE; i++) {
             if (!FD_ISSET(i, &working_set))
                 continue;
@@ -88,21 +113,16 @@ int main(int argc, char const *argv[]) {
                 }
                 std::string command(input);
                 cmd.execute_command(command, sockfd);
+                is_server_up = cmd.is_server_still_up();
+                cmd.activate_autocompletion();
                 break;
             }
-            else if (i == sockfd)
+            else if (i == sockfd && is_data_available(i, working_set))
             { // sth from server is reached
                 buffer = "";
-                bool is_up = receive_data(sockfd, buffer);
-                if (!is_up)
-                { // when server is down
-                    close(sockfd);
-                    FD_CLR(sockfd, &master_set);
-                    LOG(WARNING) << "Server is Down";
-                    sockfd = connect_to_server(server_info);
-                    FD_SET(sockfd, &master_set);
+                is_server_up = receive_data(sockfd, buffer);
+                if (!is_server_up)
                     continue;
-                }
                 LOG(INFO) << "Server response: " << buffer;
                 continue;
             }

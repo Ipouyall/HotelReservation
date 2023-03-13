@@ -24,7 +24,7 @@ void signalHandler(int signum) {
     exit(signum);
 }
 
-// TODO: logout user when client is deactivated, set fd=-1 in UM and handle this in search by fd
+// TODO: sever should save tokens and restore them when coming up
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
