@@ -4,6 +4,7 @@
 #include <glog/logging.h>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 void show_simple_json(json j){
     std::cout << (j["kind"] == "error" ? "\033[1;31m" : "" ) <<
@@ -280,9 +281,42 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         logged_in=false;
         username="";
     }
+    else if (command=="1" || command=="1_view_user_information" || command=="view_user_information")
+    {
+        LOG(INFO) << "Getting user data...";
+        std::string request = decode::get_user_info(token);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        json j = json::parse(last_response);
+        show_simple_json(j);
+        json ud = json::parse(j["data"]);
+        if(j["kind"]=="success")
+            print_user_info(ud);
+    }
     else
     {
         std::cerr << "Unknown command: '" << command << "'\n" <<
                      "use <help> command to learn about commands" << std::endl;
     }
+}
+
+template<typename T> void print_element(T t, const int& width)
+{
+    std::cout << std::left << std::setw(width) << std::setfill(' ') << t;
+}
+
+void print_user_info(json user_data){
+    std::cout<< "User account's information:" << std::endl;
+    print_element(user_data["id"], 5);
+    print_element(user_data["username"], 15);
+    print_element(user_data["role"], 6);
+    if (user_data.contains("purse"))
+        print_element(user_data["purse"], 10);
+    if (user_data.contains("phone number"))
+        print_element(user_data["phone number"], 14);
+    if (user_data.contains("address"))
+        print_element(user_data["address"], 25);
+    std::cout << std::endl;
 }

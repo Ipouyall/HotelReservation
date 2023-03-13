@@ -37,8 +37,4 @@ namespace decode {
     std::string logout(std::string& token);
 } // decode
 
-namespace encode {
-    bool is_username_available(std::string& response);
-}
-
 #endif //CODES_DECODER_H

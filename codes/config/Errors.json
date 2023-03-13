@@ -20,5 +20,6 @@
   "430": "Invalid username or password.",
   "451": "User already existed!",
   "503": "Bad sequence of commands.",
-  "000": "No content."
+  "000": "No content.",
+  "001": "Data sent in data field"
 }

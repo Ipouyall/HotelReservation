@@ -149,7 +149,3 @@ std::string decode::logout(std::string& token){
     j["token"] = token;
     return j.dump();
 }
-
-bool encode::is_username_available(std::string &response) {
-
-}

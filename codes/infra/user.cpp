@@ -221,3 +221,20 @@ void UserManager::client_dead(int fd) {
             return;
         }
 }
+
+std::string UserManager::get_user_data(std::string token) {
+    int idx = search_by_token(token);
+    if (idx==-1)
+        return "";
+    auto user = users[idx];
+    json j;
+    j["id"] = user.id;
+    j["username"] = user.username;
+    j["role"] = user.privilege ? "admin" : "user";
+    if (!user.privilege)
+        return j.dump();
+    j["purse"] = user.account_balance;
+    j["phone number"] = user.phone_number;
+    j["address"] = user.address;
+    return j.dump();
+}

@@ -50,7 +50,8 @@ public:
     bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     int get_id(std::string token);
     void client_dead(int fd);
-    // TODO: add functionality get user/users data
+    // TODO: add functionality get users data
+    std::string get_user_data(std::string token); // TODO: implement this
 };
 
 

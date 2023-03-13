@@ -39,6 +39,8 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
         rsp = signup(json_data_in, um);
     else if(cmd == "logout")
         rsp = logout(json_data_in, um);
+    else if(cmd == "user_info")
+        rsp = view_user_information(json_data_in, um);
     return rsp;
 }
 
@@ -127,5 +129,18 @@ std::string Server::logout(json &j_in, UserManager &um) {
     json rsp;
 
     rsp = response("success", "201", "Hope to see you later!");
+    return rsp.dump();
+}
+
+std::string Server::view_user_information(json &j_in, UserManager &um) {
+    LOG(INFO) << "View-user-info request received";
+    std::string token = j_in["token"];
+    std::string data = um.get_user_data(token);
+    json rsp;
+    if (data=="")
+        rsp = response("error", "000", "Couldn't find any data from this user, you may need to login again or edit your info");
+    else
+        rsp = response("success", "001", "Here is your information");
+    rsp["data"] = data;
     return rsp.dump();
 }
