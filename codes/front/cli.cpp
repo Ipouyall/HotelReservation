@@ -107,6 +107,8 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
         if (!sent)
             return;
         is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
         json j = json::parse(last_response);
         if (j["kind"]=="error"){
             show_simple_json(j);
@@ -144,6 +146,8 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
         if (!sent)
             return;
         is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
         json j = json::parse(last_response);
         show_simple_json(j);
         if (j["kind"]=="error"){
@@ -296,6 +300,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         if (!sent)
             return;
         is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
         json j = json::parse(last_response);
         show_simple_json(j);
         token="";
@@ -310,6 +316,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         if (!sent)
             return;
         is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
         json j = json::parse(last_response);
         show_simple_json(j);
         std::string udata = j["data"];

@@ -87,10 +87,11 @@ int main(int argc, char const *argv[]) {
     cmd.activate_autocompletion();
 
     while (true) {
+        cmd.activate_autocompletion();
         if (!is_server_up)
         { // when server is down
-            close(sockfd);
             FD_CLR(sockfd, &master_set);
+            close(sockfd);
             LOG(WARNING) << "Server is Down";
             sockfd = connect_to_server(server_info);
             FD_SET(sockfd, &master_set);
@@ -109,13 +110,13 @@ int main(int argc, char const *argv[]) {
                 char* input;
                 if((input = readline(">> ")) == nullptr) {
                     LOG(ERROR) << "Couldn't read user prompt";
-                    break;
+                    continue;
                 }
                 std::string command(input);
                 cmd.execute_command(command, sockfd);
                 is_server_up = cmd.is_server_still_up();
                 cmd.activate_autocompletion();
-                break;
+                continue;
             }
             else if (i == sockfd && is_data_available(i, working_set))
             { // sth from server is reached
@@ -126,8 +127,6 @@ int main(int argc, char const *argv[]) {
                 LOG(INFO) << "Server response: " << buffer;
                 continue;
             }
-            else
-                LOG(WARNING) << "Unknown file descriptor: " << i;
         }
     }
     google::ShutdownGoogleLogging();
