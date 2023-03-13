@@ -77,12 +77,10 @@ int main(int argc, char const *argv[]) {
 //        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
 
         for (int i = 0; i < FD_SETSIZE; i++) {
-            std::cout << 1 << std::endl;
             if (!FD_ISSET(i, &working_set))
                 continue;
             if (i == STDIN_FILENO)
             { // input from stdin
-                std::cout << 2 << std::endl;
                 char* input;
                 if((input = readline("")) == nullptr) {
                     LOG(ERROR) << "Couldn't read user prompt";
@@ -94,7 +92,6 @@ int main(int argc, char const *argv[]) {
             }
             else if (i == sockfd)
             { // sth from server is reached
-                std::cout << 3 << std::endl;
                 buffer = "";
                 bool is_up = receive_data(sockfd, buffer);
                 if (!is_up)
@@ -106,7 +103,6 @@ int main(int argc, char const *argv[]) {
                     FD_SET(sockfd, &master_set);
                     continue;
                 }
-                std::cout << 4 << std::endl;
                 LOG(INFO) << "Server response: " << buffer;
                 continue;
             }
