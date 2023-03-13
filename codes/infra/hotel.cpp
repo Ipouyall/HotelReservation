@@ -21,8 +21,8 @@ std::vector<HotelRoom> get_hotel_information(std::string path) {
             auto user = RoomUser{
                     u["id"],
                     u["numOfBeds"],
-                    u["reserveDate"],
-                    u["checkoutDate"],
+                    dateManager::convert(u["reserveDate"]),
+                    dateManager::convert(u["checkoutDate"]),
             };
             info.users.push_back(user);
         }
@@ -32,18 +32,12 @@ std::vector<HotelRoom> get_hotel_information(std::string path) {
 }
 
 bool HotelRoom::check_user_reserved(int user_id){
-    for(int i = 0;i < users.size();i++){
-        if(user_id == users[i].id){
-            return true;
-        }
-    }
-    return false;
+    return search_user_by_id(user_id) != -1;
 }
 
 HotelManager::HotelManager(){
     rooms = get_hotel_information(DEFAULT_HOTEL_PATH);
 }
-
 int HotelManager::search_by_room_num(std::string room_num){
     for(int i = 0;i < rooms.size();i++){
         if(rooms[i].room_number == room_num){
@@ -104,6 +98,284 @@ bool HotelManager::check_user_reserved(std::string room_num, int user_id){
     int index = search_by_room_num(room_num);
     if(index != -1){
         return rooms[index].check_user_reserved(user_id);
+    }
+    return false;
+}
+
+bool HotelManager::add_room(std::string room_num, int capacity, int price_per_bed){
+    int index = search_by_room_num(room_num);
+    if(room_num == "")
+        return false;
+    if(index == -1){
+        HotelRoom new_room;
+        new_room.room_number = room_num;
+        new_room.max_capacity = capacity;
+        new_room.current_capacity = capacity;
+        new_room.is_full = false;
+        new_room.price_per_bed = price_per_bed;
+        rooms.push_back(new_room);
+        return true;
+    }
+    return false;
+}
+
+bool HotelManager::check_room_available(date::year_month_day check_in, date::year_month_day check_out,
+                            std::string room_num, int number_of_bed){
+    LOG(INFO) << "Checking room available";
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        bool check_result = rooms[index].check_room_available(check_in, check_out, number_of_bed);
+        LOG(INFO) << "Checking room available finished";
+        return check_result;
+    }
+    return false;
+}
+
+void HotelManager::update_date(const date::year_month_day& new_date){
+    LOG(INFO) << "Updating hotel rooms date to " << new_date;
+    for(int i = 0;i < rooms.size();i++){
+        rooms[i].is_full = false;
+        rooms[i].current_capacity = rooms[i].max_capacity;
+        std::vector<RoomUser> check_in_users = rooms[i].update_date(new_date);
+        for(int j = 0;j < check_in_users.size();j++){
+            rooms[i].current_capacity -= check_in_users[j].number_of_reservation;
+        }
+        if(rooms[i].current_capacity == 0)
+            rooms[i].is_full = true;
+    }
+    LOG(INFO) << "Updating hotel rooms date to " << new_date << " finished";
+}
+
+std::vector<ReservationDetail> HotelManager::get_reservations(int user_id){
+    std::vector<ReservationDetail> reservs;
+    for(int i = 0;i < rooms.size();i++){
+        if(rooms[i].check_user_reserved(user_id))
+            reservs.push_back(rooms[i].get_user_reservation(user_id));
+    }
+    return reservs;
+}
+
+bool HotelManager::cancel_reservation(int user_id, std::string room_num, int num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        return rooms[index].cancel_reservation(user_id, num);
+    }
+    return false;
+}
+bool HotelRoom::check_room_available(date::year_month_day check_in, 
+                                date::year_month_day check_out, int number_of_bed){
+    int availble_capacity;
+
+    for(auto i = date::sys_days(check_in); i < date::sys_days(check_out); i+=date::days{1}){
+        availble_capacity = max_capacity;
+        for(int j = 0;j < users.size();j++){
+            if(date::sys_days(users[j].reserve_date) <= i && i < date::sys_days(users[j].checkout_date)){
+                availble_capacity -= users[j].number_of_reservation;
+            }
+            if(number_of_bed > availble_capacity){
+                LOG(INFO) << "Checking room available finished";
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+std::vector<RoomUser> HotelRoom::update_date(date::year_month_day new_date){
+    std::vector<RoomUser> check_in_users;
+    for(int i = 0;i < users.size();i++){
+        if(new_date >= users[i].checkout_date){
+            users.erase(users.begin() + i);
+            i--;
+        }
+        else if(new_date < users[i].checkout_date && new_date >= users[i].reserve_date){
+            check_in_users.push_back(users[i]);
+        }
+    }
+    return check_in_users;
+}
+
+int HotelRoom::search_user_by_id(int user_id){
+    for(int i = 0;i < users.size();i++){
+        if(user_id == users[i].id)
+            return i;
+    }
+    return -1;
+}
+
+ReservationDetail HotelRoom::get_user_reservation(int user_id){
+    int index = search_user_by_id(user_id);
+    if(index != -1){
+        return ReservationDetail{
+            room_number,
+            price_per_bed,
+            users[index].number_of_reservation,
+            users[index].reserve_date,
+            users[index].checkout_date
+        };
+    }
+
+}
+
+bool HotelRoom::cancel_reservation(int user_id, int num){
+    int index = search_user_by_id(user_id);
+    if(index != -1){
+        if(num == users[index].number_of_reservation){
+            users.erase(users.begin() + index);
+        }
+        else{
+        users[index].number_of_reservation -= num;
+        }        
+        return true;
+    }
+    return false;
+}
+
+bool HotelManager::cancelation_date_validation(const date::year_month_day& current_date,
+                                                 int user_id, std::string room_num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        ReservationDetail reserve = rooms[index].get_user_reservation(user_id);
+        return current_date < reserve.reserve_date;
+    }
+    return false;
+}
+
+bool HotelManager::cancelation_capacity_validation(std::string room_num, int user_id, int num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        ReservationDetail reserve = rooms[index].get_user_reservation(user_id);
+        return num <= reserve.number_of_reservation;
+    }
+    return false;
+}
+
+bool HotelManager::booking_date_validation(const date::year_month_day& current_date, 
+                                    date::year_month_day check_in_date, date::year_month_day check_out_date){
+    if(check_in_date <= current_date || check_in_date >= check_out_date)
+        return false;
+    return true;
+}
+
+int HotelManager::get_total_price(std::string room_num, int number_of_beds){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        return number_of_beds * rooms[index].price_per_bed;
+    }
+    return 0;
+}
+
+void HotelRoom::add_reservation(RoomUser user){
+    users.push_back(user);
+}
+
+void HotelManager::book(std::string room_num, int user_id, int num_of_beds,
+                 date::year_month_day check_in_date, date::year_month_day check_out_date){
+    
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        rooms[index].add_reservation(RoomUser{
+            user_id,
+            num_of_beds,
+            check_in_date,
+            check_out_date
+        });
+    }
+}
+
+bool HotelRoom::is_user_in(const date::year_month_day& current_date, int user_id){
+    int index = search_user_by_id(user_id);
+    if(index != -1){
+        if(current_date >= users[index].reserve_date && current_date < users[index].checkout_date){
+            return true;
+        }
+    }
+    return false;
+}
+
+bool HotelManager::is_user_in_room(const date::year_month_day& current_date,
+                                     std::string room_num, int user_id){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        return rooms[index].is_user_in(current_date, user_id);
+    }
+    return false;
+}
+
+bool HotelRoom::left_user(int user_id){
+    int index = search_user_by_id(user_id);
+    if(index != -1){
+        is_full = false;
+        current_capacity += users[index].number_of_reservation;
+        users.erase(users.begin() + index);
+        return true;
+    }
+    return false;
+}
+
+bool HotelManager::left_user_room(std::string room_num, int user_id){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        return rooms[index].left_user(user_id);
+    }
+    return false;
+}
+
+void HotelRoom::make_empty(const date::year_month_day& current_date){
+    is_full = false;
+    current_capacity = max_capacity;
+    for(int i = 0;i < users.size();i++){
+        if(is_user_in(current_date, users[i].id)){
+            users.erase(users.begin() + i);
+            i--;
+        }
+    }
+}
+
+void HotelManager::make_room_empty(const date::year_month_day& current_date, std::string room_num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        rooms[index].make_empty(current_date);
+    }
+}
+
+bool HotelManager::modify_room(std::string room_num, int max_capacity, int price_per_bed){
+    if(price_per_bed <= 0 || max_capacity <= 0)
+        return false;
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        rooms[index].max_capacity = max_capacity;
+        rooms[index].price_per_bed = price_per_bed;
+        return true;
+    }
+    return false;
+}
+
+bool HotelManager::room_is_empty(std::string room_num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        return rooms[index].current_capacity == rooms[index].max_capacity;
+    }
+    return false;
+}
+
+bool HotelManager::remove_room(std::string room_num){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        rooms.erase(rooms.begin() + index);
+        return true;
+    }
+    return false;
+}
+
+bool HotelManager::modify_validation(std::string room_num, int new_max_capacity){
+    int index = search_by_room_num(room_num);
+    if(index != -1){
+        if(rooms[index].current_capacity < rooms[index].max_capacity && 
+            new_max_capacity < rooms[index].max_capacity){
+            return false;
+        }
+        return true;
     }
     return false;
 }

@@ -209,3 +209,11 @@ int UserManager::get_id(std::string token){
     }
     return -1;
 }
+
+bool UserManager::have_enough_money(std::string token, int price){
+    int index = search_by_token(token);
+    if(index != -1){
+        return users[index].account_balance >= price;
+    }
+    return false;
+}

@@ -7,15 +7,13 @@ date::year_month_day dateManager::convert(std::string dateString){
     return tempDate;
 }
 
-void dateManager::incDays(date::year_month_day& date_, int days_){
-    date_ = date::sys_days(date_) + date::days{days_};
+date::year_month_day dateManager::inc_days(date::year_month_day date_, int days_){
+    return date::sys_days(date_) + date::days{days_};
 }
 
-bool dateManager::isBigger(date::year_month_day date1, date::year_month_day date2){
-    return date::sys_days(date1) > date::sys_days(date2);
-}
 
-std::string dateManager::getString(date::year_month_day date_){
+
+std::string dateManager::get_string(date::year_month_day date_){
     std::ostringstream out;
     out.fill('0');
     out << std::setw(2) << unsigned{date_.day()} << "-"

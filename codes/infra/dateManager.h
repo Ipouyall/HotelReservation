@@ -7,9 +7,8 @@
 
 namespace dateManager{
     date::year_month_day convert(std::string dateString);
-    void incDays(date::year_month_day& date_, int days_);
-    bool isBigger(date::year_month_day date1, date::year_month_day date2);
-    std::string getString(date::year_month_day date_);
+    date::year_month_day inc_days(date::year_month_day date_, int days_);
+    std::string get_string(date::year_month_day date_);
 };
 
 
