@@ -1,7 +1,3 @@
-//
-// Created by Pooya Sadeghi on 2023-03-12.
-//
-
 #include "cli.h"
 #include "../infra/client.h"
 #include "../infra/socketUtils.h"
@@ -52,7 +48,7 @@ char** Command::initial_state_command_completion(const char* text, int start, in
 }
 
 // Command execution function
-void Command::execute_initial_state_command(const std::string& cmd, int server_fd) { // TODO rsp should change to last_response
+void Command::execute_initial_state_command(const std::string& cmd, int server_fd) {
     std::string help_prompt = "You haven't authorized yet, try following:\n";
     help_prompt += "- signin <username> <password>\n";
     help_prompt += "- signup <username>\n";
@@ -70,6 +66,7 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     if (command == "help")
     {
         std::cout << help_prompt << std::endl;
+        add_history(command.c_str());
     }
     else if (command == "quit" || command == "exit")
     {
@@ -90,6 +87,7 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     else if (command == "signup")
     {
         LOG(INFO) << "Signup menu...";
+        add_history(command.c_str());
         std::string password, phone, address;
         int balance;
         stream >> username;
@@ -125,6 +123,8 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     }
     else if (command == "signin")
     {
+        LOG(INFO) << "Signin menu...";
+        add_history(command.c_str());
         std::string pass;
         stream >> username;
         if (username == "signin")
@@ -232,7 +232,7 @@ char** Command::reservation_command_completion(const char* text, int start, int 
     }
 }
 
-void Command::execute_reservation_command(const std::string& cmd, int server_fd) { // TODO rsp should change to last_response
+void Command::execute_reservation_command(const std::string& cmd, int server_fd) {
     std::istringstream stream(cmd);
     std::string command;
     stream >> command;
@@ -260,6 +260,6 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else
     {
         std::cerr << "Unknown command: '" << command << "'\n" <<
-                     "use help to learn how to use this commands" << std::endl;
+                     "use <help> command to learn about commands" << std::endl;
     }
 }
