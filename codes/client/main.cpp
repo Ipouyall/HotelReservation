@@ -46,7 +46,7 @@ void signalHandler(int signum) {
 void setUP_client(char const * name) {
     google::InitGoogleLogging(name);
     google::InstallFailureSignalHandler();
-    FLAGS_minloglevel=0;
+    FLAGS_minloglevel=3;
     FLAGS_colorlogtostderr = true;
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
@@ -77,16 +77,24 @@ int main(int argc, char const *argv[]) {
 //        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
 
         for (int i = 0; i < FD_SETSIZE; i++) {
+            std::cout << 1 << std::endl;
             if (!FD_ISSET(i, &working_set))
                 continue;
             if (i == STDIN_FILENO)
             { // input from stdin
-                cmd.execute_initial_menu(sockfd);
-//                    std::cin >> buffer;
-//                    send_message(sockfd, buffer);
+                std::cout << 2 << std::endl;
+                char* input;
+                if((input = readline("")) == nullptr) {
+                    LOG(ERROR) << "Couldn't read user prompt";
+                    break;
+                }
+                std::string command(input);
+                cmd.initial_state_execute_command(command, sockfd);
+                break;
             }
             else if (i == sockfd)
             { // sth from server is reached
+                std::cout << 3 << std::endl;
                 buffer = "";
                 bool is_up = receive_data(sockfd, buffer);
                 if (!is_up)
@@ -98,11 +106,12 @@ int main(int argc, char const *argv[]) {
                     FD_SET(sockfd, &master_set);
                     continue;
                 }
+                std::cout << 4 << std::endl;
                 LOG(INFO) << "Server response: " << buffer;
+                continue;
             }
             else
                 LOG(WARNING) << "Unknown file descriptor: " << i;
-
         }
     }
     google::ShutdownGoogleLogging();

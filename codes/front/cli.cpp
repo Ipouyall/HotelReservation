@@ -121,7 +121,7 @@ void Command::initial_state_execute_command(const std::string& cmd, int server_f
     }
     else
     {
-        std::cerr << "Unknown command: " << command << std::endl;
+        std::cerr << "Unknown command: '" << command << "'" << std::endl;
         std::cout << help_prompt << std::endl;
     }
 }
