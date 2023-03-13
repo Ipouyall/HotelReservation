@@ -82,7 +82,7 @@ int main(int argc, char const *argv[]) {
             if (i == STDIN_FILENO)
             { // input from stdin
                 char* input;
-                if((input = readline("")) == nullptr) {
+                if((input = readline(">> ")) == nullptr) {
                     LOG(ERROR) << "Couldn't read user prompt";
                     break;
                 }

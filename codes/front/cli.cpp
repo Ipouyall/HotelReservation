@@ -21,7 +21,7 @@ Command::Command() {
 
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {
-            "signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-"
+            "signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
     };
     const char* prefix = rl_line_buffer;
     std::vector<std::string> matches;
@@ -58,7 +58,8 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     help_prompt += "         <address>\n";
     help_prompt += "- exit\n";
     help_prompt += "- quit\n";
-    help_prompt += "- help";
+    help_prompt += "- help\n";
+    help_prompt += "- clear";
     std::istringstream stream(cmd);
     std::string command;
     stream >> command;
@@ -147,6 +148,10 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
         token = j["token"];
         logged_in=true;
     }
+    else if(command == "clear")
+    {
+        std::cout << "\x1B[2J\x1B[H";
+    }
     else
     {
         std::cerr << "Unknown command: '" << command << "'" << std::endl;
@@ -170,6 +175,7 @@ void Command::activate_autocompletion() {
         prompt += "8. Leaving room\n";
         prompt += "9. Rooms\n";
         prompt += "0. Logout\n";
+        prompt += "+ clear\n";
         prompt += "+ exit\n";
         prompt += "+ quit\n";
         prompt += "+ help";
@@ -179,7 +185,6 @@ void Command::activate_autocompletion() {
         LOG(INFO) << "Initial menu is activating...";
         rl_attempted_completion_function = (CPPFunction *) initial_state_command_completion;
     }
-    std::cout << "> ";
 }
 
 void Command::execute_command(std::string command, int server_fd) {
@@ -194,19 +199,19 @@ void Command::execute_command(std::string command, int server_fd) {
 
 char** Command::reservation_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {
-            "", "view ",
-            "1. view user information", "view user information",
-            "2. view all users", "view all users",
-            "3. view rooms information", "view rooms information",
-            "4. booking", "booking",
-            "5. cancelling", "cancelling",
-            "6. pass day", "pass day",
-            "7. edit information", "edit information",
-            "8. leaving room", "leaving room",
-            "9. rooms", "rooms",
-            "0. logout", "logout",
+            "", "view_",
+            "1_view_user_information", "view_user_information",
+            "2_view_all_users", "view_all_users",
+            "3_view_rooms_information", "view_rooms_information",
+            "4_booking", "booking",
+            "5_cancelling", "cancelling",
+            "6_pass_day", "pass_day",
+            "7_edit_information", "edit_information",
+            "8_leaving_room", "leaving_room",
+            "9_rooms", "rooms",
+            "0_logout", "logout",
             "signup",
-            "exit", "quit", "help", "verbose+", "verbose++", "verbose-"
+            "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
     };
     const char* prefix = rl_line_buffer;
     std::vector<std::string> matches;
@@ -256,6 +261,24 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else if (command == "verbose-")
     {
         FLAGS_minloglevel = 3;
+    }
+    else if (command == "clear")
+    {
+        std::cout << "\x1B[2J\x1B[H";
+    }
+    else if (command=="0" || command=="0_logout" || command=="logout")
+    {
+        LOG(INFO) << "Logging out...";
+        std::string request = decode::logout(token);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        json j = json::parse(last_response);
+        show_simple_json(j);
+        token="";
+        logged_in=false;
+        username="";
     }
     else
     {
