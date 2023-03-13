@@ -60,7 +60,7 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
     if (!um.user_validation(username, password))
     {
         rsp = response(
-                "error", "430", "Sign_in failed due to invalid pass os uname."
+                "error", "430", "Sign_in failed due to invalid password/username or you logged in before."
         );
         LOG(WARNING) << "Login request from (" << fd << ") failed!";
     }

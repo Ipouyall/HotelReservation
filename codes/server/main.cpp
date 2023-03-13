@@ -18,17 +18,6 @@
 #include "../infra/server.h"
 
 
-
-struct Client{
-    int client_fd;
-
-    Client(int fd){ client_fd = fd;}
-};
-
-void add_new_client(std::vector<Client>& clients, int sock_fd) {
-    clients.push_back(Client(sock_fd));
-}
-
 void signalHandler(int signum) {
     LOG(WARNING) << "Received signal " << signum << ", terminating the program...";
     google::ShutdownGoogleLogging();
@@ -47,7 +36,6 @@ int main(int argc, char *argv[]) {
 
     signal(SIGINT, signalHandler);
 
-    std::vector<Client> clients;
     int server_fd, new_socket, max_sd;
     std::string bufferString;
     fd_set master_set, working_set;
@@ -70,14 +58,14 @@ int main(int argc, char *argv[]) {
                 new_socket = acceptClient(i);
                 if (new_socket != -1)
                     FD_SET(new_socket, &master_set);
-                add_new_client(clients, new_socket);
             } else {
                 bufferString = "";
                 bool is_up = receive_data(i, bufferString);
                 if (!is_up) { // Client has left
                     close(i);
                     FD_CLR(i, &master_set);
-                    LOG(INFO) << "Client gone";
+                    LOG(INFO) << "Client gone (" << i << ")";
+                    users.client_dead(i);
                     continue;
                 }
 

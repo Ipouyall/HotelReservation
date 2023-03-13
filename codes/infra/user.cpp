@@ -76,7 +76,7 @@ bool UserManager::username_exist(std::string username){
 bool UserManager::user_validation(std::string username, std::string password){
     for(int i = 0;i < users.size();i++)
         if(username == users[i].username)
-            return users[i].password == password;
+            return users[i].password == password && (!users[i].is_logged_in);
     return false;
 }
 
@@ -123,15 +123,14 @@ bool UserManager::signup(std::string username, std::string password,
     return true;
 }
 
-std::string UserManager::login(std::string username, int ufd){
+std::string UserManager::login(std::string username, int ufd) {
     int index = search_by_username(username);
-    if(index != -1){
-        users[index].is_logged_in = true;
-        users[index].token = generate_token();
-        users[index].socket_fd = ufd;
-        return users[index].token;
-    }
-    return "";
+    if (index == -1)
+        return "";
+    users[index].is_logged_in = true;
+    users[index].token = generate_token();
+    users[index].socket_fd = ufd;
+    return users[index].token;
 }
 
 bool UserManager::logout(std::string token){
@@ -210,4 +209,15 @@ int UserManager::get_id(std::string token){
         return users[index].id;
     }
     return -1;
+}
+
+void UserManager::client_dead(int fd) {
+    for(int i=0; i < users.size(); i++)
+        if(fd == users[i].socket_fd && users[i].is_logged_in){
+            users[i].token="";
+            users[i].socket_fd=-1;
+            users[i].is_logged_in=false;
+            LOG(INFO) << "Client dead (" << users[i].username << ")";
+            return;
+        }
 }
