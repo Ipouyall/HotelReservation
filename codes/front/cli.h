@@ -22,15 +22,16 @@ private:
 
 public:
     Command();
-    void activate_initial_menu();
-    void execute_initial_menu(int server_fd);
-    void initial_state_execute_command(const std::string& cmd, int server_fd);
+    void activate_autocompletion();
+    void execute_command(std::string command, int server_fd);
     std::string get_token();
     std::string get_last_response();
 
 private:
     static char** initial_state_command_completion(const char* text, int start, int end);
-
+    static char** reservation_command_completion(const char* text, int start, int end);
+    void execute_reservation_command(const std::string& cmd, int server_fd);
+    void execute_initial_state_command(const std::string& cmd, int server_fd);
 };
 
 void show_simple_json(json j);

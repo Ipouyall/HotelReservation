@@ -72,7 +72,7 @@ int main(int argc, char const *argv[]) {
     FD_SET(STDIN_FILENO, &master_set);
 
     while (true) {
-        cmd.activate_initial_menu(); // TODO: has more functionality
+        cmd.activate_autocompletion();
         working_set = master_set;
 //        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
 
@@ -87,7 +87,7 @@ int main(int argc, char const *argv[]) {
                     break;
                 }
                 std::string command(input);
-                cmd.initial_state_execute_command(command, sockfd);
+                cmd.execute_command(command, sockfd);
                 break;
             }
             else if (i == sockfd)
