@@ -115,7 +115,6 @@ int main(int argc, char const *argv[]) {
                 std::string command(input);
                 cmd.execute_command(command, sockfd);
                 is_server_up = cmd.is_server_still_up();
-                cmd.activate_autocompletion();
                 continue;
             }
             else if (i == sockfd && is_data_available(i, working_set))

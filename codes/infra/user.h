@@ -21,7 +21,7 @@ typedef struct UserData{
     std::string to_string();
 } UserData;
 
-std::vector<UserData> get_users_data(std::string path);
+std::vector<UserData> read_users_data(std::string path);
 std::string generate_token();
 
 enum class UserRole{ ADMIN, USER };

@@ -39,6 +39,6 @@ private:
 
 void show_simple_json(json j);
 void print_user_info(json user_data);
-void print_users_info(json users_data);
+void print_users_info(std::string users_data);
 
 #endif //CODES_CLI_H

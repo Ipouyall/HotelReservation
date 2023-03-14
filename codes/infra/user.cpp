@@ -6,7 +6,7 @@
 #include "user.h"
 
 
-std::vector<UserData> get_users_data(std::string path){
+std::vector<UserData> read_users_data(std::string path){
     LOG(INFO) << "Start initializing users data from: [" << path << ']';
     std::vector<UserData> users_data;
 
@@ -62,7 +62,7 @@ std::string generate_token() {
 }
 
 UserManager::UserManager(){
-    users = get_users_data(DEFAULT_USERS_PATH);
+    users = read_users_data(DEFAULT_USERS_PATH);
 }
 
 int UserManager::search_by_username(std::string username){
@@ -116,7 +116,7 @@ bool UserManager::signup(std::string username, std::string password,
         return false;
     // valid phones:
     // 09123456789, +989123456789
-    if(phone.size() != 11 && phone.size() != 13)
+    if(phone.size() != 11 && phone.size() != 13 && phone.size() != 14)
         return false;
     if(username_exist(username))
         return false;
@@ -247,8 +247,8 @@ std::string UserManager::get_users_data(std::string token) {
     auto role = get_role(token);
     if(role == UserRole::USER)
         return "";
-    json ju;
-    for(int i=0; i<users.size(); i++)
-        ju[i] = users[i].to_string();
+    auto ju = json::array();
+    for(auto user : users)
+        ju.push_back(user.to_string());
     return ju.dump();
 }
