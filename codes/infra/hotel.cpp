@@ -63,6 +63,7 @@ ReservationDetail HotelRoom::get_user_reservation(int user_id){
     int index = search_user_by_id(user_id);
     if(index == -1)
         return ReservationDetail{};
+
     return ReservationDetail{
         room_number,
         price_per_bed,
@@ -140,13 +141,13 @@ json HotelRoom::get_data_json(bool include_users){
     j["status"] = is_full;
     j["total beds"] = max_capacity;
     j["available bed"] = current_capacity;
-    j["price"] = price_per_bed;
+    j["price(each bed)"] = price_per_bed;
     if(include_users){
         auto users_json = json::array();
         for(int i = 0;i < users.size();i++){
             users_json.push_back({
                 {"id", users[i].id},
-                {"price(each bed)", users[i].number_of_reservation},
+                {"beds", users[i].number_of_reservation},
                 {"check-in", dateManager::get_string(users[i].reserve_date)},
                 {"check-out", dateManager::get_string(users[i].checkout_date)}
             });
@@ -161,9 +162,8 @@ HotelManager::HotelManager(){
 }
 int HotelManager::search_by_room_num(std::string room_num){
     for(int i = 0;i < rooms.size();i++){
-        if(rooms[i].room_number == room_num){
+        if(rooms[i].room_number == room_num)
             return i;
-        }
     }
     return -1;
 }
@@ -240,9 +240,8 @@ bool HotelManager::check_room_available(date::year_month_day check_in, date::yea
         return false;
     }
 
-    bool check_result = rooms[index].check_room_available(check_in, check_out, number_of_bed);
     LOG(INFO) << "Checking room available finished";
-    return check_result;
+    return rooms[index].check_room_available(check_in, check_out, number_of_bed);;
 }
 
 void HotelManager::update_date(const date::year_month_day& new_date){
