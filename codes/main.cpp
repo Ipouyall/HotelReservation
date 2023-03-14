@@ -45,6 +45,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::cout << "Token2: " << generate_token() << std::endl;
 
     UserManager manager;
+    manager.save("./config/UsersInfo2.json");
 
 
     std::cout << "before insertion" << std::endl;
@@ -57,9 +58,12 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::cout << "after insertion" << std::endl;
 
     manager.printINfo();
+    
 
 
     HotelManager h_manager;
+    std::cout << h_manager.get_rooms_data(true) << std::endl;
+    h_manager.save("./config/RoomsInfo2.json");
     std::string date_now = "25-02-2023";
     std::cout << "*******************************************initial*******************************************" << std::endl;
     h_manager.update_date(dateManager::convert(date_now));

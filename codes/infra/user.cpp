@@ -217,3 +217,25 @@ bool UserManager::have_enough_money(std::string token, int price){
     }
     return false;
 }
+
+void UserManager::save(std::string path){
+    nlohmann::ordered_json content;
+    auto users_json = nlohmann::ordered_json::array();
+    for(int i = 0;i < users.size();i++){
+        nlohmann::ordered_json user_json;
+        user_json["id"] = users[i].id;
+        user_json["user"] = users[i].username;
+        user_json["password"] = users[i].password;
+        user_json["admin"] = users[i].privilege;
+        if(!users[i].privilege){
+            user_json["purse"] = std::to_string(users[i].account_balance);
+            user_json["phoneNumber"] = users[i].phone_number;
+            user_json["address"] = users[i].address;
+        }
+
+        users_json.push_back(user_json);
+    }
+    content["users"] = users_json;
+
+    writeJsonFile(path, content);
+}

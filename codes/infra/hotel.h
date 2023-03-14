@@ -41,6 +41,7 @@ typedef struct HotelRoom{
     bool is_user_in(const date::year_month_day& current_date, int user_id);
     bool left_user(int user_id);
     void make_empty(const date::year_month_day& current_date);
+    json get_data_json(bool include_users);
 } HotelRoom;
 
 
@@ -82,6 +83,8 @@ public:
     bool modify_room(std::string room_num, int max_capacity, int price_per_bed);
     bool room_is_empty(std::string room_num);
     bool remove_room(std::string room_num);
+    std::string get_rooms_data(bool include_users);
+    void save(std::string path);
 };
 
 

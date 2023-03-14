@@ -379,3 +379,62 @@ bool HotelManager::modify_validation(std::string room_num, int new_max_capacity)
     }
     return false;
 }
+
+json HotelRoom::get_data_json(bool include_users){
+    json j;
+    j["room num"] = room_number;
+    j["is full"] = is_full;
+    j["max capacity"] = max_capacity;
+    j["current capacity"] = current_capacity;
+    j["price per bed"] = price_per_bed;
+    if(include_users){
+        auto users_json = json::array();
+        for(int i = 0;i < users.size();i++){
+            users_json.push_back({
+                {"id", users[i].id},
+                {"number of bed", users[i].number_of_reservation},
+                {"check-in", dateManager::get_string(users[i].reserve_date)},
+                {"check-out", dateManager::get_string(users[i].checkout_date)}
+            });
+        }
+        j["users"] = users_json;
+    }
+    return j;
+}
+std::string HotelManager::get_rooms_data(bool include_users){
+    auto rooms_json = json::array();
+    for(int i = 0;i < rooms.size();i++){
+        rooms_json.push_back(rooms[i].get_data_json(include_users));
+    }
+    return rooms_json.dump();
+}
+
+void HotelManager::save(std::string path){
+    nlohmann::ordered_json content;
+    auto rooms_json = nlohmann::ordered_json::array();
+    for(int i = 0;i < rooms.size();i++){
+        nlohmann::ordered_json room_json;
+        room_json["number"] = rooms[i].room_number;
+        room_json["status"] = (int)rooms[i].is_full;
+        room_json["price"] = rooms[i].price_per_bed;
+        room_json["maxCapacity"] = rooms[i].max_capacity;
+        room_json["capacity"] = rooms[i].current_capacity;
+
+        auto users_json = nlohmann::ordered_json::array();
+        for(int j = 0;j < rooms[i].users.size();j++){
+            users_json.push_back({
+                {"id", rooms[i].users[j].id},
+                {"numOfBeds", rooms[i].users[j].number_of_reservation},
+                {"reserveDate", dateManager::get_string(rooms[i].users[j].reserve_date)},
+                {"checkoutDate", dateManager::get_string(rooms[i].users[j].checkout_date)}
+            });
+        }
+        room_json["users"] = users_json;
+
+        rooms_json.push_back(room_json);
+    }
+    content["rooms"] = rooms_json;
+
+    writeJsonFile(path, content);
+}
+

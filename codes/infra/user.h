@@ -50,6 +50,7 @@ public:
     bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     int get_id(std::string token);
     bool have_enough_money(std::string token, int price);
+    void save(std::string path);
     // TODO: add functionality get user/users data
 };
 

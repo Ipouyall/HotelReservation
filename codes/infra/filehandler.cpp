@@ -19,3 +19,8 @@ json readJsonFile(std::string filePath)
 
     return jsonData;
 }
+
+void writeJsonFile(std::string filePath, nlohmann::ordered_json content){
+    std::ofstream fileStream(filePath);
+    fileStream << content.dump(4);
+}
