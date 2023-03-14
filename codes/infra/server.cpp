@@ -72,7 +72,7 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
     {
         std::string token = um.login(username, fd);
         rsp =  response(
-                "success", "230", "You logged in successfully"
+                "success", "230", "You logged in successfully."
         );
         rsp["token"] = token;
         LOG(INFO) << "Login request from (" << fd << ") succeeded.";
@@ -88,7 +88,7 @@ std::string Server::is_uname_available(json &j_in, UserManager &um) {
 
     if (available)
     {
-        rsp = response("success", "000", "Just validated you username, please complete your registration");
+        rsp = response("success", "311", "Just validated you username, please complete your registration.");
         LOG(INFO) << "Username is available";
     }
     else
@@ -113,12 +113,12 @@ std::string Server::signup(json& j, UserManager& um) {
     if(succeeded)
     {
         LOG(INFO) << "User signed up successfully";
-        rsp = response("success", "311", "We honor to announce you are part of our community from now on.");
+        rsp = response("success", "231", "We honor to announce you are part of our community from now on.");
     }
     else
     {
         LOG(WARNING) << "User signup failed";
-        rsp = response("error", "451", "Signing up failed, make sure you entered valid data.");
+        rsp = response("error", "503", "Signing up failed, make sure you entered valid data.");
     }
     return rsp.dump();
 }
@@ -140,7 +140,7 @@ std::string Server::view_user_information(json &j_in, UserManager &um) {
     std::string data = um.get_user_data(token);
     json rsp;
     if (data=="")
-        rsp = response("error", "000", "Couldn't find any data from this user, you may need to login again or edit your info");
+        rsp = response("error", "000", "Couldn't find any data from this user, you may need to login again or edit your info.");
     else
         rsp = response("success", "001", "Here is your information");
     rsp["data"] = data;

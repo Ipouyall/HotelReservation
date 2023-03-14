@@ -21,5 +21,5 @@
   "451": "User already existed!",
   "503": "Bad sequence of commands.",
   "000": "No content.",
-  "001": "Data sent in data field"
+  "001": "Request validated successfully"
 }
