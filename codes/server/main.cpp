@@ -18,24 +18,15 @@
 #include "../infra/server.h"
 
 
-
-struct Client{
-    int client_fd;
-
-    Client(int fd){ client_fd = fd;}
-};
-
-void add_new_client(std::vector<Client>& clients, int sock_fd) {
-    clients.push_back(Client(sock_fd));
-}
-
 void signalHandler(int signum) {
     LOG(WARNING) << "Received signal " << signum << ", terminating the program...";
     google::ShutdownGoogleLogging();
     exit(signum);
 }
 
-int main(int argc, char *argv[]){
+// TODO: sever should save tokens and restore them when coming up
+// TODO: server need to get set-time command from terminal
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
     FLAGS_colorlogtostderr = true;
@@ -46,48 +37,45 @@ int main(int argc, char *argv[]){
 
     signal(SIGINT, signalHandler);
 
-    std::vector<Client> clients;
     int server_fd, new_socket, max_sd;
-    char buffer[1024];
     std::string bufferString;
     fd_set master_set, working_set;
-    auto server_info = get_server_config(DEFAULT_SERVER_PATH);
+    auto server = Server();
+    auto users = UserManager();
 
-    server_fd = setupServer(server_info.host_name.c_str(), server_info.port);
+    server_fd = server.get_fd();
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
     LOG(INFO) << "Server is running...";
-    
+
     while (true) {
         working_set = master_set;
         select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
-        for(int i = 0;i < FD_SETSIZE;i++){
-            if (FD_ISSET(i, &working_set)) {
-                if(i == server_fd){
-                    new_socket = acceptClient(i);
-                    if(new_socket!=-1)
-                        FD_SET(new_socket, &master_set);
-                    add_new_client(clients, new_socket);
+        for (int i = 0; i < FD_SETSIZE; i++) {
+            if (!FD_ISSET(i, &working_set))
+                continue;
+            if (i == server_fd) {
+                new_socket = acceptClient(i);
+                if (new_socket != -1)
+                    FD_SET(new_socket, &master_set);
+            } else {
+                bufferString = "";
+                bool is_up = receive_data(i, bufferString);
+                if (!is_up) { // Client has left
+                    close(i);
+                    FD_CLR(i, &master_set);
+                    LOG(INFO) << "Client (" << i << ") gone";
+                    users.client_dead(i);
+                    continue;
                 }
-                else {
-                    memset(buffer, 0, 1024);
-                    int bytes_received = recv(i , buffer, 1024, 0);
-                    if (bytes_received == 0) { // Client has left
-                        close(i);
-                        FD_CLR(i, &master_set);
-                        LOG(INFO) << "Client gone";
-                        continue;
-                    }
 
-                    std::cout << "client fd = " << i << " said = " << buffer << std::endl;
-
-                    std::string response = "ok";
-                    if(send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
-                        LOG(INFO) << "Your response sent";
-                    else
-                        LOG(WARNING) << "Error on sending your Response!";
-                }
+                LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl;
+                std::string response = server.diagnose(bufferString, users, i);
+                if (send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
+                    LOG(INFO) << "Your response sent";
+                else
+                    LOG(WARNING) << "Error on sending your Response!";
             }
         }
     }

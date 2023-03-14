@@ -1,6 +1,7 @@
 #include <string>
 #include <array>
 #include <memory>
+#include <cstring>
 #include <glog/logging.h>
 #include "socketUtils.h"
 
@@ -100,3 +101,39 @@ bool reconnectServer(const char* server_ip, int server_port, int& sockfd){
     LOG(INFO) << "Connected successfully";
     return true;
 }
+
+bool send_message(int sockfd, std::string msg){
+    if(send(sockfd, msg.c_str(), msg.size(), 0) != -1)
+    {
+        LOG(INFO) << "Message sent successfully";
+        return true;
+    }
+    else
+    {
+        LOG(ERROR) << "Error occurred during sending message";
+        return false;
+    }
+}
+
+bool receive_data(int sockfd, std::string& received) {
+    LOG(INFO) << "Receiving data...";
+    char* buffer = new char[BUFFER_SIZE];
+    std::memset(buffer, 0, BUFFER_SIZE);
+    int total_bytes_received = 0;
+    int bytes_received = recv(sockfd, buffer, BUFFER_SIZE, 0);
+    if (bytes_received < 0) { // error occurred
+        LOG(ERROR) << "Error receiving data";
+        delete[] buffer;
+        return false;
+    } else if (bytes_received == 0) { // server is down
+        delete[] buffer;
+        return false;
+    }
+    total_bytes_received = bytes_received;
+    std::string data(buffer, bytes_received);
+    delete[] buffer;
+    received = data;
+    return true;
+}
+
+

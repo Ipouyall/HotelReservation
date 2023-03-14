@@ -6,7 +6,7 @@
 #include "user.h"
 
 
-std::vector<UserData> get_users_data(std::string path){
+std::vector<UserData> read_users_data(std::string path){
     LOG(INFO) << "Start initializing users data from: [" << path << ']';
     std::vector<UserData> users_data;
 
@@ -31,6 +31,20 @@ std::vector<UserData> get_users_data(std::string path){
     return users_data;
 }
 
+std::string UserData::to_string() {
+    json j;
+    j["id"] = id;
+    j["username"] = username;
+    j["role"] = privilege ? "super-user" : "user";
+    j["status"] = is_logged_in ? "Online" : "Offline";
+    if (privilege)
+        return j.dump();
+    j["purse"] = account_balance;
+    j["phone number"] = phone_number;
+    j["address"] = address;
+    return j.dump();
+}
+
 std::string generate_token() {
     // Create a random number generator with a random seed
     std::random_device rd;
@@ -49,7 +63,7 @@ std::string generate_token() {
 }
 
 UserManager::UserManager(){
-    users = get_users_data(DEFAULT_USERS_PATH);
+    users = read_users_data(DEFAULT_USERS_PATH);
 }
 
 int UserManager::search_by_username(std::string username){
@@ -61,7 +75,7 @@ int UserManager::search_by_username(std::string username){
 
 int UserManager::search_by_token(std::string token){
     for(int i = 0;i < users.size();i++)
-        if(users[i].token == token)
+        if(users[i].token == token && users[i].is_logged_in)
             return i;
     return -1;
 }
@@ -76,7 +90,7 @@ bool UserManager::username_exist(std::string username){
 bool UserManager::user_validation(std::string username, std::string password){
     for(int i = 0;i < users.size();i++)
         if(username == users[i].username)
-            return users[i].password == password;
+            return users[i].password == password && (!users[i].is_logged_in);
     return false;
 }
 
@@ -102,8 +116,8 @@ bool UserManager::signup(std::string username, std::string password,
     if(username == "" || password == "" || addr == "")
         return false;
     // valid phones:
-    // 09123456789, +989123456789
-    if(phone.size() != 11 && phone.size() != 13)
+    // 09123456789, +989123456789, 00989123456789
+    if(phone.size() != 11 && phone.size() != 13 && phone.size() != 14)
         return false;
     if(username_exist(username))
         return false;
@@ -123,15 +137,14 @@ bool UserManager::signup(std::string username, std::string password,
     return true;
 }
 
-std::string UserManager::login(std::string username, int ufd){
+std::string UserManager::login(std::string username, int ufd) {
     int index = search_by_username(username);
-    if(index != -1){
-        users[index].is_logged_in = true;
-        users[index].token = generate_token();
-        users[index].socket_fd = ufd;
-        return users[index].token;
-    }
-    return "";
+    if (index == -1)
+        return "";
+    users[index].is_logged_in = true;
+    users[index].token = generate_token();
+    users[index].socket_fd = ufd;
+    return users[index].token;
 }
 
 bool UserManager::logout(std::string token){
@@ -190,6 +203,8 @@ bool UserManager::increase_balance(std::string token, int amount){
 
 bool UserManager::edit_information(std::string token, std::string new_pass, 
                                     std::string phone="", std::string addr=""){
+    if(new_pass == "")
+        return false;
     int index = search_by_token(token);
     if(index != -1){
         users[index].password = new_pass;
@@ -239,3 +254,33 @@ void UserManager::save(std::string path){
 
     writeJsonFile(path, content);
 }
+
+void UserManager::client_dead(int fd) {
+    for(int i=0; i < users.size(); i++)
+        if(fd == users[i].socket_fd && users[i].is_logged_in){
+            users[i].token="";
+            users[i].socket_fd=-1;
+            users[i].is_logged_in=false;
+            LOG(INFO) << "Client dead (" << users[i].username << ")";
+            return;
+        }
+}
+
+std::string UserManager::get_user_data(std::string token) {
+    int idx = search_by_token(token);
+    if (idx == -1)
+        return "";
+    auto user = users[idx];
+    return users[idx].to_string();
+}
+
+std::string UserManager::get_users_data(std::string token) {
+    auto role = get_role(token);
+    if(role == UserRole::USER)
+        return "";
+    auto ju = json::array();
+    for(auto user : users)
+        ju.push_back(user.to_string());
+    return ju.dump();
+}
+

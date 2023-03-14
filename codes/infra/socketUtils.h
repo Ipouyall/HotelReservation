@@ -17,9 +17,13 @@
 #include <fcntl.h>
 #include <string>
 
+#define BUFFER_SIZE 1024*512
+
 int acceptClient(int server_fd);
 int setupServer(const char* server_ip, int port, int listen_for=20);
 int connectServer(const char* server_ip, int server_port, bool& succeeded);
 bool reconnectServer(const char* server_ip, int server_port, int& sockfd);
+bool send_message(int sockfd, std::string msg);
+bool receive_data(int sockfd, std::string& received);
 
 #endif //SOCKET_UTILS_H

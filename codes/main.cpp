@@ -36,7 +36,7 @@ int main(int argc, char **argv) { // using just for test functionalities
         std::cout << _h.room_number << ' ' << _h.max_capacity - _h.current_capacity << std::endl;
     }
 
-    auto u = get_users_data(DEFAULT_USERS_PATH);
+    auto u = read_users_data(DEFAULT_USERS_PATH);
     for (auto _u:u){
         std::cout << _u.id << ' ' << (_u.privilege ? _u.username : _u.phone_number) << std::endl;
     }
@@ -46,7 +46,6 @@ int main(int argc, char **argv) { // using just for test functionalities
 
     UserManager manager;
     manager.save("./config/UsersInfo2.json");
-
 
     std::cout << "before insertion" << std::endl;
     manager.printINfo();

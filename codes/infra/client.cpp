@@ -1,4 +1,4 @@
-#include "decoder.h"
+#include "client.h"
 
 std::string decode::sign_in(std::string& username, std::string& password){
     json j;

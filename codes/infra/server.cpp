@@ -1,4 +1,5 @@
 #include "server.h"
+#include "socketUtils.h"
 #include <iostream>
 #include <glog/logging.h>
 
@@ -16,40 +17,145 @@ serverConfig get_server_config(std::string path) {
     return conf;
 }
 
-std::string command::diagnose(std::string command) {
-    json json_data_in = json::parse(command);
-    // TODO: parse command regarding 'kind'
-    //  also, update arguments of this function
-
+Server::Server() {
+    config = get_server_config(DEFAULT_SERVER_PATH);
+    errors = readJsonFile(DEFAULT_ERRORS_PATH);
+    fd = setupServer(config.host_name.c_str(), config.port);
 }
 
-std::string command::sign_in(json& j_in, UserManager& um, int fd){
+int Server::get_fd() { return fd;}
+
+std::string Server::diagnose(std::string command, UserManager& um, int client_fd) {
+    LOG(INFO) << "Diagnosing incoming request";
+    json json_data_in = json::parse(command);
+    // TODO: update arguments of this function
+    std::string cmd = json_data_in["kind"];
+    std:: string rsp;
+    if(cmd == "sign_in")
+        rsp = sign_in(json_data_in, um, client_fd);
+    else if(cmd == "free_username")
+        rsp = is_uname_available(json_data_in, um);
+    else if(cmd == "sign_up")
+        rsp = signup(json_data_in, um);
+    else if(cmd == "logout")
+        rsp = logout(json_data_in, um);
+    else if(cmd == "user_info")
+        rsp = view_user_information(json_data_in, um);
+    else if(cmd == "view_users_info")
+        rsp = view_all_users(json_data_in, um);
+    return rsp;
+}
+
+json Server::response(std::string kind, std::string status_code, std::string msg){
+    std::string status_msg = errors[status_code];
+    json rsp;
+    rsp["kind"] = kind;
+    rsp["status_code"] = status_code;
+    rsp["status"] = status_msg;
+    rsp["message"] = msg;
+    return rsp;
+}
+
+std::string Server::sign_in(json& j_in, UserManager& um, int fd){
+    LOG(INFO) << "Login request received on (" << fd << ")";
     std::string username = j_in["username"];
     std::string password = j_in["password"];
-    if (!um.user_validation(username, password)) {
-        // TODO: signup failed, error => 430
+    json rsp;
+    if (!um.user_validation(username, password))
+    {
+        rsp = response(
+                "error", "430", "Sign_in failed due to invalid password/username or you logged in before."
+        );
+        LOG(WARNING) << "Login request from (" << fd << ") failed!";
     }
-    std::string token = um.login(username, fd);
-    // TODO: on success, return 230 and token
+    else
+    {
+        std::string token = um.login(username, fd);
+        rsp =  response(
+                "success", "230", "You logged in successfully"
+        );
+        rsp["token"] = token;
+        LOG(INFO) << "Login request from (" << fd << ") succeeded.";
+    }
+    return rsp.dump();
 }
 
-std::string command::signup(json& j, UserManager& um) {
-    // TODO: in prev stage before calling this,
-    //      we have to store username and inject in here
-    //      and check if user exists(error => 451) o.w. (311)
+std::string Server::is_uname_available(json &j_in, UserManager &um) {
+    LOG(INFO) << "Checking username is available";
+    std::string username = j_in["username"];
+    bool available = !um.username_exist(username);
+    json rsp;
 
+    if (available)
+    {
+        rsp = response("success", "000", "Just validated you username, please complete your registration");
+        LOG(INFO) << "Username is available";
+    }
+    else
+    {
+        rsp = response("error", "451", "Username exists, try another one.");
+        LOG(WARNING) << "Username is available";
+    }
+    return rsp.dump();
+}
+
+std::string Server::signup(json& j, UserManager& um) {
+    // TODO: client, after validating username is free, should again send uname,
+    LOG(INFO) << "Signup request received";
     std::string username = j["username"];
     std::string pass = j["password"];
     int ba = j["balance"];
     std::string pn = j["phone"];
     std::string addr = j["addr"];
+    json rsp;
 
     auto succeeded = um.signup(username, pass, ba, pn, addr);
-    // TODO:  503 on error and 231 for success
+    if(succeeded)
+    {
+        LOG(INFO) << "User signed up successfully";
+        rsp = response("success", "311", "We honor to announce you are part of our community from now on.");
+    }
+    else
+    {
+        LOG(WARNING) << "User signup failed";
+        rsp = response("error", "451", "Signing up failed, make sure you entered valid data.");
+    }
+    return rsp.dump();
 }
 
-std::string command::logout(json &j_in, UserManager &um) {
+std::string Server::logout(json &j_in, UserManager &um) {
+    // TODO: client fd should be cleared from fd-set
+    LOG(INFO) << "Logout request received";
     std::string token = j_in["token"];
     auto succeeded = um.logout(token);
-    // TODO: 201 on success
+    json rsp;
+
+    rsp = response("success", "201", "Hope to see you later!");
+    return rsp.dump();
+}
+
+std::string Server::view_user_information(json &j_in, UserManager &um) {
+    LOG(INFO) << "View-user-info request received";
+    std::string token = j_in["token"];
+    std::string data = um.get_user_data(token);
+    json rsp;
+    if (data=="")
+        rsp = response("error", "000", "Couldn't find any data from this user, you may need to login again or edit your info");
+    else
+        rsp = response("success", "001", "Here is your information");
+    rsp["data"] = data;
+    return rsp.dump();
+}
+
+std::string Server::view_all_users(json &j_in, UserManager &um) {
+    LOG(INFO) << "New request for view all users data received";
+    std::string token = j_in["token"];
+    std::string data = um.get_users_data(token);
+    json rsp;
+    if(data=="")
+        rsp = response("error", "403", "You don't have required access for this functionality");
+    else
+        rsp = response("success", "001", "Here is all users in our hotel");
+    rsp["data"] = data;
+    return rsp.dump();
 }

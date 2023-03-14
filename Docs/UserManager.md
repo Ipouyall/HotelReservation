@@ -8,7 +8,7 @@ Now we describe it;s methods:
 - `search_by_username`: Search based on username given and return index of user or -1 if doesn't exist.
 - `search_by_token`: Search based on token given and return index of user or -1 if doesn't exist.
 - `username_exist`: Check that if username give exist in users(`return true`) or not (`return false`).
-- `user_validation`: Check that password given is equal to password saved for username given.
+- `user_validation`: Check that password given is equal to password saved for username given (as it use for login, also check that user hasn't logged in yet).
 - `signup`: Add new user to users based on information given and return true if successfully done.
     also check if username or address are not *null* and phone number is valid.
 - `login`: Change `is_logged_in` atrribute to `true` , set token and then return it for user based on username given.

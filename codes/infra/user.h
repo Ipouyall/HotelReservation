@@ -17,9 +17,11 @@ typedef struct UserData{
     bool is_logged_in = false;
     int socket_fd = -1;
     std::string token = "";
+
+    std::string to_string();
 } UserData;
 
-std::vector<UserData> get_users_data(std::string path);
+std::vector<UserData> read_users_data(std::string path);
 std::string generate_token();
 
 enum class UserRole{ ADMIN, USER };
@@ -51,7 +53,9 @@ public:
     int get_id(std::string token);
     bool have_enough_money(std::string token, int price);
     void save(std::string path);
-    // TODO: add functionality get user/users data
+    void client_dead(int fd);
+    std::string get_user_data(std::string token);
+    std::string get_users_data(std::string token);
 };
 
 

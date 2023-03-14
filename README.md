@@ -9,17 +9,13 @@ Socket Programming,First CA of The Computer Networks course @ University of Tehr
 On macos, run:
 
 ```shell
-brew install cmake
-```
-
-```shell
-arch -arm64 brew install openssl
+brew install cmake libedit
 ```
 
 For linux:
 
 ```shell
-sudo apt-get install cmake openssl
+sudo apt-get install cmake libedit-dev
 ```
 
 ### 02. Generate Makefile
