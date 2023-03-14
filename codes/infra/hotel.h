@@ -68,7 +68,7 @@ public:
                             std::string room_num, int number_of_bed);
     void update_date(const date::year_month_day& new_date);
     std::vector<ReservationDetail> get_reservations(int user_id);
-    bool cancel_reservation(int user_id, std::string room_num, int num);
+    int cancel_reservation(int user_id, std::string room_num, int num);
     bool cancelation_date_validation(const date::year_month_day& current_date, int user_id, std::string room_num);
     bool cancelation_capacity_validation(std::string room_num, int user_id, int num);
     bool booking_date_validation(const date::year_month_day& current_date, 

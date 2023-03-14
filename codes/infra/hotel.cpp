@@ -274,18 +274,20 @@ std::vector<ReservationDetail> HotelManager::get_reservations(int user_id){
     return reservs;
 }
 
-bool HotelManager::cancel_reservation(int user_id, std::string room_num, int num){
+int HotelManager::cancel_reservation(int user_id, std::string room_num, int num){
     int index = search_by_room_num(room_num);
     if(index == -1)
-        return false;
-    return rooms[index].cancel_reservation(user_id, num);
+        return -1;
+    ReservationDetail details = rooms[index].get_user_reservation(user_id);
+    rooms[index].cancel_reservation(user_id, num);
+    return 0.5 * get_total_price(room_num, num, details.reserve_date, details.checkout_date);
 }
 
 bool HotelManager::cancelation_date_validation(const date::year_month_day& current_date,
                                                  int user_id, std::string room_num){
     int index = search_by_room_num(room_num);
     if(index == -1)
-        return false;
+        return -1;
 
     ReservationDetail reserve = rooms[index].get_user_reservation(user_id);
     return current_date < reserve.reserve_date;
