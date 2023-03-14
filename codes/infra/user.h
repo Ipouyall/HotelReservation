@@ -51,6 +51,8 @@ public:
     bool increase_balance(std::string token, int amount);
     bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     int get_id(std::string token);
+    bool have_enough_money(std::string token, int price);
+    void save(std::string path);
     void client_dead(int fd);
     std::string get_user_data(std::string token);
     std::string get_users_data(std::string token);

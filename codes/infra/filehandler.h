@@ -8,5 +8,6 @@
 using json = nlohmann::json;
 
 json readJsonFile(std::string filePath);
+void writeJsonFile(std::string filePath, nlohmann::ordered_json content);
 
 #endif //SRC_FILEHANDLER_H
