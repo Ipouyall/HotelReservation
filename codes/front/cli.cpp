@@ -322,8 +322,27 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         show_simple_json(j);
         std::string udata = j["data"];
         json ud = json::parse(udata);
-        if(j["kind"]=="success")
+        if(j["kind"]=="success") {
+            std::cout<< "User account's information:" << std::endl;
             print_user_info(ud);
+            std::cout<< "---" << std::endl;
+        }
+    }
+    else if (command=="2" || command=="2_view_all_users", command=="view_all_users"){
+        LOG(INFO) << "Getting all users data...";
+        std::string request = decode::get_users(token);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
+        json j = json::parse(last_response);
+        show_simple_json(j);
+        std::string udata = j["data"];
+        json ud = json::parse(udata);
+        if(j["kind"]=="success")
+            print_users_info(ud);
     }
     else
     {
@@ -339,7 +358,6 @@ void print_element(T t, const int& width)
 }
 
 void print_user_info(json user_data){
-    std::cout<< "User account's information:" << std::endl;
     std::string valid_rows[] = {
             "id", "username", "role", "purse","phone number", "address"
     };
@@ -351,4 +369,15 @@ void print_user_info(json user_data){
         print_element(user_data[key], 30);
         std::cout << std::endl;
     }
+}
+
+void print_users_info(json users_data){
+    std::cout<< "Users information:" << std::endl;
+
+    for (auto& key : users_data.items()) {
+        json j = json::parse(users_data[key]);
+        std::cout<< "+++" << std::endl;
+        print_user_info(j);
+    }
+    std::cout<< "---" << std::endl;
 }

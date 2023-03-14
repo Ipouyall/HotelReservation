@@ -31,6 +31,19 @@ std::vector<UserData> get_users_data(std::string path){
     return users_data;
 }
 
+std::string UserData::to_string() {
+    json j;
+    j["id"] = id;
+    j["username"] = username;
+    j["role"] = privilege ? "admin" : "user";
+    if (privilege)
+        return j.dump();
+    j["purse"] = account_balance;
+    j["phone number"] = phone_number;
+    j["address"] = address;
+    return j.dump();
+}
+
 std::string generate_token() {
     // Create a random number generator with a random seed
     std::random_device rd;
@@ -61,7 +74,7 @@ int UserManager::search_by_username(std::string username){
 
 int UserManager::search_by_token(std::string token){
     for(int i = 0;i < users.size();i++)
-        if(users[i].token == token)
+        if(users[i].token == token && users[i].is_logged_in)
             return i;
     return -1;
 }
@@ -224,17 +237,18 @@ void UserManager::client_dead(int fd) {
 
 std::string UserManager::get_user_data(std::string token) {
     int idx = search_by_token(token);
-    if (idx==-1)
+    if (idx == -1)
         return "";
     auto user = users[idx];
-    json j;
-    j["id"] = user.id;
-    j["username"] = user.username;
-    j["role"] = user.privilege ? "admin" : "user";
-    if (user.privilege)
-        return j.dump();
-    j["purse"] = user.account_balance;
-    j["phone number"] = user.phone_number;
-    j["address"] = user.address;
-    return j.dump();
+    return users[idx].to_string();
+}
+
+std::string UserManager::get_users_data(std::string token) {
+    auto role = get_role(token);
+    if(role == UserRole::USER)
+        return "";
+    json ju;
+    for(int i=0; i<users.size(); i++)
+        ju[i] = users[i].to_string();
+    return ju.dump();
 }

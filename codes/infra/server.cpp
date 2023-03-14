@@ -41,6 +41,8 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
         rsp = logout(json_data_in, um);
     else if(cmd == "user_info")
         rsp = view_user_information(json_data_in, um);
+    else if(cmd == "view_users_info")
+        rsp = view_all_users(json_data_in, um);
     return rsp;
 }
 
@@ -141,6 +143,19 @@ std::string Server::view_user_information(json &j_in, UserManager &um) {
         rsp = response("error", "000", "Couldn't find any data from this user, you may need to login again or edit your info");
     else
         rsp = response("success", "001", "Here is your information");
+    rsp["data"] = data;
+    return rsp.dump();
+}
+
+std::string Server::view_all_users(json &j_in, UserManager &um) {
+    LOG(INFO) << "New request for view all users data received";
+    std::string token = j_in["token"];
+    std::string data = um.get_users_data(token);
+    json rsp;
+    if(data=="")
+        rsp = response("error", "403", "You don't have required access for this functionality");
+    else
+        rsp = response("success", "001", "Here is all users in our hotel");
     rsp["data"] = data;
     return rsp.dump();
 }

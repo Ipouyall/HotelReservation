@@ -36,7 +36,7 @@ private:
     std::string is_uname_available(json& j_in, UserManager& um);
     std::string logout(json& j_in, UserManager& um);
     std::string view_user_information(json& j_in, UserManager& um);
-    std::string view_all_users(json& j_in, UserManager& um); // TODO: implement dependency
+    std::string view_all_users(json& j_in, UserManager& um);
     std::string view_rooms_info(); // TODO: implement dependency
     std::string book_a_room(); // TODO: implement dependency
     std::string cancel_a_room(); // TODO: implement dependency
