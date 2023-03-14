@@ -60,7 +60,6 @@ public:
     bool room_num_exist(std::string room_num);
     void print_info();
     bool room_is_full(std::string room_num);
-    int get_current_capacity(std::string room_num);
     void change_capacity(std::string room_num, int value);
     bool check_user_reserved(std::string room_num, int user_id);
     bool add_room(std::string room_num, int capacity, int price_per_bed);
