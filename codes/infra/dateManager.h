@@ -11,9 +11,4 @@ namespace dateManager{
     std::string get_string(date::year_month_day date_);
 };
 
-
-
-
-
-
 #endif //DATA_MANAGER_H
