@@ -49,6 +49,7 @@ public:
     bool increase_balance(std::string token, int amount);
     bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
     int get_id(std::string token);
+    bool have_enough_money(std::string token, int price);
     // TODO: add functionality get user/users data
 };
 
