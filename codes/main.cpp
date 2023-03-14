@@ -44,6 +44,8 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::cout << "Token1: " << generate_token() << std::endl;
     std::cout << "Token2: " << generate_token() << std::endl;
 
+
+
     UserManager manager;
     manager.save("./config/UsersInfo2.json");
 
@@ -100,7 +102,7 @@ int main(int argc, char **argv) { // using just for test functionalities
         LOG(WARNING) << "User already in room. Can't cancel";
     }
     else{
-        h_manager.cancel_reservation(user_id, room_num, num);
+        std::cout << h_manager.cancel_reservation(user_id, room_num, num) << std::endl;
     }
     h_manager.print_info();
 
@@ -118,6 +120,9 @@ int main(int argc, char **argv) { // using just for test functionalities
     date::year_month_day check_in = dateManager::convert("25-02-2023");
     date::year_month_day check_out = dateManager::convert("28-02-2023");
 
+    auto dfd = date::sys_days(check_out) - date::sys_days(check_in);
+    std::cout<<dfd.count()<<std::endl;
+
     if(!h_manager.room_num_exist(room_num)){
         LOG(WARNING) << "Room doesn't exist";
     }
@@ -134,6 +139,7 @@ int main(int argc, char **argv) { // using just for test functionalities
         LOG(WARNING) << "The room is full.";
     }
     else{
+        std::cout << "total price = " << h_manager.get_total_price(room_num, num_of_beds, check_in, check_out) << std::endl;
         h_manager.book(current, room_num, user_id, num_of_beds, check_in, check_out);
     }
     h_manager.print_info();

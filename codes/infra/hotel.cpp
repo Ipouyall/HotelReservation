@@ -307,12 +307,14 @@ bool HotelManager::booking_date_validation(const date::year_month_day& current_d
     return true;
 }
 
-int HotelManager::get_total_price(std::string room_num, int number_of_beds){
+int HotelManager::get_total_price(std::string room_num, int number_of_beds, 
+                                    date::year_month_day check_in_date, date::year_month_day check_out_date){
     int index = search_by_room_num(room_num);
     if(index == -1)
         return 0;
 
-    return number_of_beds * rooms[index].price_per_bed;
+    auto days = date::sys_days(check_out_date) - date::sys_days(check_in_date);
+    return number_of_beds * rooms[index].price_per_bed * days.count();
 }
 
 void HotelManager::book(const date::year_month_day& current_date,
