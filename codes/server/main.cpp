@@ -25,6 +25,7 @@ void signalHandler(int signum) {
 }
 
 // TODO: sever should save tokens and restore them when coming up
+// TODO: server need to get set-time command from terminal
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
@@ -64,19 +65,18 @@ int main(int argc, char *argv[]) {
                 if (!is_up) { // Client has left
                     close(i);
                     FD_CLR(i, &master_set);
-                    LOG(INFO) << "Client gone (" << i << ")";
+                    LOG(INFO) << "Client (" << i << ") gone";
                     users.client_dead(i);
                     continue;
                 }
 
-                std::cout << "client fd = " << i << " said = " << bufferString << std::endl;
+                LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl;
                 std::string response = server.diagnose(bufferString, users, i);
                 if (send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
                     LOG(INFO) << "Your response sent";
                 else
                     LOG(WARNING) << "Error on sending your Response!";
             }
-
         }
     }
     google::ShutdownGoogleLogging();

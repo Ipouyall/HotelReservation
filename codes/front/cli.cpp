@@ -26,7 +26,7 @@ bool Command::is_server_still_up() {
 
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {
-            "signin", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
+            "signin ", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
     };
     const char* prefix = rl_line_buffer;
     std::vector<std::string> matches;
@@ -155,6 +155,7 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
         }
         token = j["token"];
         logged_in=true;
+        clear_history();
     }
     else if(command == "clear")
     {
@@ -295,6 +296,7 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else if (command=="0" || command=="0_logout" || command=="logout")
     {
         LOG(INFO) << "Logging out...";
+        add_history(command.c_str());
         std::string request = decode::logout(token);
         bool sent = send_message(server_fd, request);
         if (!sent)
@@ -311,6 +313,7 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else if (command=="1" || command=="1_view_user_information" || command=="view_user_information")
     {
         LOG(INFO) << "Getting user data...";
+        add_history(command.c_str());
         std::string request = decode::get_user_info(token);
         bool sent = send_message(server_fd, request);
         if (!sent)
@@ -330,6 +333,7 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     }
     else if (command=="2" || command=="2_view_all_users" || command=="view_all_users"){
         LOG(INFO) << "Getting all users data...";
+        add_history(command.c_str());
         std::string request = decode::get_users(token);
         bool sent = send_message(server_fd, request);
         if (!sent)

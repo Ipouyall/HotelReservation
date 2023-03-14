@@ -38,7 +38,7 @@ int connect_to_server(serverConfig& server_info, int max_attempts=10) {
 }
 
 void signalHandler(int signum) {
-    LOG(WARNING) << "Ending client...";
+    LOG(WARNING) << "Shutting down...";
     google::ShutdownGoogleLogging();
     exit(0);
 }
