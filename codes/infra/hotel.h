@@ -56,6 +56,7 @@ private:
     std::vector<HotelRoom> rooms;
 public:
     HotelManager();
+    HotelManager(const date::year_month_day& current_date);
     int search_by_room_num(std::string room_num);
     bool room_num_exist(std::string room_num);
     void print_info();
@@ -73,7 +74,8 @@ public:
     bool booking_date_validation(const date::year_month_day& current_date, 
                                     date::year_month_day check_in_date, date::year_month_day check_out_date);
     int get_total_price(std::string room_num, int number_of_beds);
-    void book(std::string room_num, int user_id, int num_of_beds,
+    void book(const date::year_month_day& current_date,
+                 std::string room_num, int user_id, int num_of_beds,
                  date::year_month_day check_in_date, date::year_month_day check_out_date);
     bool is_user_in_room(const date::year_month_day& current_date, std::string room_num, int user_id);
     bool left_user_room(std::string room_num, int user_id);

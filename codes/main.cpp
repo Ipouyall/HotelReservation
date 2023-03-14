@@ -25,7 +25,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
 
-    LOG(INFO) << "Initializing program ...";
+    LOG(INFO) << "Initializing program ........................";
 
     auto c = get_server_config(DEFAULT_SERVER_PATH);
     std::cout << c.host_name << ':' << c.port << std::endl;
@@ -110,12 +110,12 @@ int main(int argc, char **argv) { // using just for test functionalities
     /////////////////////////////// book ///////////////////////////////////////
     std::cout << "*****************************************after booking******************************************" << std::endl;
     std::cout << "current date = " << current << std::endl;
-    room_num = "301";
+    room_num = "101";
     // std::string token = "dfvdsgdgdfogdg";
     // int user_id = manager.get_id(token);
     user_id = 2;
     int num_of_beds = 1;
-    date::year_month_day check_in = dateManager::convert("26-02-2023");
+    date::year_month_day check_in = dateManager::convert("25-02-2023");
     date::year_month_day check_out = dateManager::convert("28-02-2023");
 
     if(!h_manager.room_num_exist(room_num)){
@@ -134,7 +134,7 @@ int main(int argc, char **argv) { // using just for test functionalities
         LOG(WARNING) << "The room is full.";
     }
     else{
-        h_manager.book(room_num, user_id, num_of_beds, check_in, check_out);
+        h_manager.book(current, room_num, user_id, num_of_beds, check_in, check_out);
     }
     h_manager.print_info();
 
@@ -163,7 +163,7 @@ int main(int argc, char **argv) { // using just for test functionalities
 
 
 
-    /////////////////////////////// leave ///////////////////////////////////////
+    /////////////////////////////// empty ///////////////////////////////////////
     std::cout << "*****************************************after empty******************************************" << std::endl;
     std::cout << "current date = " << current << std::endl;
     room_num = "201";
@@ -176,7 +176,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     }
     h_manager.print_info();
 
-    ///////////////////////////// leave  end /////////////////////////////////////
+    ///////////////////////////// empty  end /////////////////////////////////////
 
     
 

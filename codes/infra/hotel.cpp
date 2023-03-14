@@ -160,6 +160,12 @@ json HotelRoom::get_data_json(bool include_users){
 HotelManager::HotelManager(){
     rooms = get_hotel_information(DEFAULT_HOTEL_PATH);
 }
+
+HotelManager::HotelManager(const date::year_month_day& current_date){
+    rooms = get_hotel_information(DEFAULT_HOTEL_PATH);
+    update_date(current_date);
+}
+
 int HotelManager::search_by_room_num(std::string room_num){
     for(int i = 0;i < rooms.size();i++){
         if(rooms[i].room_number == room_num)
@@ -296,7 +302,7 @@ bool HotelManager::cancelation_capacity_validation(std::string room_num, int use
 
 bool HotelManager::booking_date_validation(const date::year_month_day& current_date, 
                                     date::year_month_day check_in_date, date::year_month_day check_out_date){
-    if(check_in_date <= current_date || check_in_date >= check_out_date)
+    if(check_in_date < current_date || check_in_date >= check_out_date)
         return false;
     return true;
 }
@@ -309,7 +315,8 @@ int HotelManager::get_total_price(std::string room_num, int number_of_beds){
     return number_of_beds * rooms[index].price_per_bed;
 }
 
-void HotelManager::book(std::string room_num, int user_id, int num_of_beds,
+void HotelManager::book(const date::year_month_day& current_date,
+                 std::string room_num, int user_id, int num_of_beds,
                  date::year_month_day check_in_date, date::year_month_day check_out_date){
     
     int index = search_by_room_num(room_num);
@@ -322,6 +329,8 @@ void HotelManager::book(std::string room_num, int user_id, int num_of_beds,
         check_in_date,
         check_out_date
     });
+    if(check_in_date == current_date)
+        update_date(current_date);
 }
 
 bool HotelManager::is_user_in_room(const date::year_month_day& current_date,
