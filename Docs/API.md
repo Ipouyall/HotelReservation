@@ -249,7 +249,6 @@ This is only available for ***super-user***s or ***admin***s.
         "phone number": "<phone_number> for non super-user",
         "address": "<address> for non super-user",
         },
-        ...
     ]
 }
 ```
