@@ -8,7 +8,7 @@
 
 void show_simple_json(json j){
     std::cout << (j["kind"] == "error" ? "\033[1;31m" : "" ) <<
-    j["status_code"] << ":" << j["status"] << "\n:::" <<
+    j["status_code"] << ":" << j["status"] << "\n::::::" <<
     j["message"] << "\033[0m" << std::endl;
 }
 
@@ -346,8 +346,10 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else
     {
         std::cerr << "Unknown command: '" << command << "'\n" <<
-                     "use <help> command to learn about commands" << std::endl;
+                     "::use <help> command to learn about commands" << std::endl;
     }
+    std::cout << "Press <Enter> to continue...";
+    std::cin.get();
 }
 
 template<typename T>
@@ -358,12 +360,12 @@ void print_element(T t, const int& width)
 
 void print_user_info(json user_data){
     std::string valid_rows[] = {
-            "id", "username", "role", "purse","phone number", "address"
+            "id", "username", "role", "status", "purse","phone number", "address"
     };
     for (auto& key : valid_rows) {
         if (!user_data.contains(key))
             continue;
-        print_element(key, 20);
+        print_element(key, 15);
         print_element(":", 2);
         print_element(user_data[key], 30);
         std::cout << std::endl;

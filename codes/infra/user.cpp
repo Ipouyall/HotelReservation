@@ -35,7 +35,8 @@ std::string UserData::to_string() {
     json j;
     j["id"] = id;
     j["username"] = username;
-    j["role"] = privilege ? "admin" : "user";
+    j["role"] = privilege ? "super-user" : "user";
+    j["status"] = is_logged_in ? "Online" : "Offline";
     if (privilege)
         return j.dump();
     j["purse"] = account_balance;
@@ -115,7 +116,7 @@ bool UserManager::signup(std::string username, std::string password,
     if(username == "" || password == "" || addr == "")
         return false;
     // valid phones:
-    // 09123456789, +989123456789
+    // 09123456789, +989123456789, 00989123456789
     if(phone.size() != 11 && phone.size() != 13 && phone.size() != 14)
         return false;
     if(username_exist(username))
