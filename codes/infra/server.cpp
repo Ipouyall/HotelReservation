@@ -29,14 +29,18 @@ Server::Server() {
 int Server::get_fd() { return fd;}
 
 std::string Server::diagnose(std::string command, int client_fd) {
-    LOG(INFO) << "Diagnosing incoming request";
+    LOG(INFO) << "Diagnosing incoming request:" << command;
+    if(command == "client_dead") {
+        um.client_dead(client_fd);
+        return "";
+    }
     json json_data_in = json::parse(command);
-    // TODO: update arguments of this function
+    if (json_data_in.contains("kind") == false) {
+        return "";
+    }
     std::string cmd = json_data_in["kind"];
     std:: string rsp="";
-    if(cmd == "client_dead")
-        um.client_dead(client_fd);
-    else if(cmd == "sign_in")
+    if(cmd == "sign_in")
         rsp = sign_in(json_data_in, um, client_fd);
     else if(cmd == "free_username")
         rsp = is_uname_available(json_data_in, um);
@@ -52,6 +56,10 @@ std::string Server::diagnose(std::string command, int client_fd) {
         rsp = view_rooms_info(json_data_in, um, hm);
     else if(cmd == "booking")
         rsp = book_a_room(json_data_in, um, hm);
+    else if (cmd == "view_reservations")
+        rsp = view_reservations(json_data_in, um, hm);
+    else if (cmd == "canceling")
+        rsp = cancel_a_room(json_data_in, um, hm);
     return rsp;
 }
 
@@ -217,4 +225,43 @@ std::string Server::book_a_room(json &j_in, UserManager &um, HotelManager &hm) {
     return response("success", "110", "Room reserved successfully").dump();
 }
 
+std::string Server::view_reservations(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for view reservations received";
+    std::string token = j_in["token"];
+    UserRole role = um.get_role(token);
+    if (role != UserRole::USER)
+        return response("error", "403", "Only users can cancel a reservation").dump();
+    int user_id = um.get_id(token);
+    std::string data = hm.view_reservations(user_id);
+    json rsp;
+    if (data=="")
+        rsp = response("error", "000", "Operation failed, please try again later!");
+    else
+        rsp = response("success", "001", "Here is your reservations");
+    rsp["data"] = data;
+    return rsp.dump();
+}
 
+std::string Server::cancel_a_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for canceling a room received";
+    std::string token = j_in["token"];
+    UserRole role = um.get_role(token);
+    if (role != UserRole::USER)
+        return response("error", "403", "Only users can cancel a reservation").dump();
+    std::string room_id = j_in["roomID"];
+    int beds_count = j_in["beds_count"], user_id = um.get_id(token);
+
+    if (!hm.room_num_exist(room_id))
+        return response("error", "101", "Room number doesn't exist").dump();
+    if (!hm.check_user_reserved(room_id, user_id) ||
+        !hm.cancelation_capacity_validation(room_id, user_id, beds_count))
+        return response("error", "102",
+                        "Something is wrong with room's number or number of beds you want to cancel"
+        ).dump();
+    if (!hm.cancelation_date_validation(today_date, user_id, room_id))
+        return response("error", "401", "You can't cancel your reservation now").dump();
+    int price_back = hm.cancel_reservation(user_id, room_id, beds_count);
+    um.increase_balance(token, price_back);
+    return response("success", "110", "Reservation canceled successfully").dump();
+
+}

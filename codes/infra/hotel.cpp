@@ -73,6 +73,17 @@ ReservationDetail HotelRoom::get_user_reservation(int user_id){
     };
 }
 
+std::string ReservationDetail::to_string() {
+    json j;
+    j["room number"] = room_number;
+    j["price(per bed)"] = price_per_bed;
+    j["bed(s) you have"] = number_of_reservation;
+    j["check in"] = dateManager::get_string(reserve_date);
+    j["check out"] = dateManager::get_string(checkout_date);
+
+    return j.dump();
+}
+
 bool HotelRoom::cancel_reservation(int user_id, int num){
     int index = search_user_by_id(user_id);
     if(index == -1)
@@ -267,13 +278,13 @@ void HotelManager::update_date(const date::year_month_day& new_date){
     LOG(INFO) << "Updating hotel rooms date to " << new_date << " finished";
 }
 
-std::vector<ReservationDetail> HotelManager::get_reservations(int user_id){
-    std::vector<ReservationDetail> reservs;
-    for(int i = 0;i < rooms.size();i++){
-        if(rooms[i].check_user_reserved(user_id))
-            reservs.push_back(rooms[i].get_user_reservation(user_id));
+std::string HotelManager::view_reservations(int user_id){
+    auto jh = json::array();
+    for(auto room : rooms){
+        if(room.check_user_reserved(user_id))
+            jh.push_back(room.get_user_reservation(user_id).to_string());
     }
-    return reservs;
+    return jh.dump();
 }
 
 int HotelManager::cancel_reservation(int user_id, std::string room_num, int num){

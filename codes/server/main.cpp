@@ -61,14 +61,13 @@ int main(int argc, char *argv[]) {
                 bufferString = "";
                 bool is_up = receive_data(i, bufferString);
                 if (!is_up) { // Client has left
-                    close(i);
                     FD_CLR(i, &master_set);
                     LOG(INFO) << "Client (" << i << ") gone";
                     server.diagnose("client_dead", i);
+                    close(i);
                     continue;
                 }
 
-                LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl; // TODO: delete this before merge into main
                 std::string response = server.diagnose(bufferString, i);
                 if (send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
                     LOG(INFO) << "Your response sent";
@@ -80,5 +79,3 @@ int main(int argc, char *argv[]) {
     google::ShutdownGoogleLogging();
     return 0;
 }
-
-// TODO: having a mechanism to automatically logout user, when client is terminated

@@ -21,6 +21,8 @@ typedef struct ReservationDetail{
     int number_of_reservation; // number of beds reserved by user
     date::year_month_day reserve_date;
     date::year_month_day checkout_date;
+
+    std::string to_string();
 } ReservationDetail;
 
 typedef struct HotelRoom{
@@ -68,7 +70,7 @@ public:
     bool check_room_available(date::year_month_day check_in, date::year_month_day check_out,
                             std::string room_num, int number_of_bed);
     void update_date(const date::year_month_day& new_date);
-    std::vector<ReservationDetail> get_reservations(int user_id);
+    std::string view_reservations(int user_id);
     int cancel_reservation(int user_id, std::string room_num, int num);
     bool cancelation_date_validation(const date::year_month_day& current_date, int user_id, std::string room_num);
     bool cancelation_capacity_validation(std::string room_num, int user_id, int num);

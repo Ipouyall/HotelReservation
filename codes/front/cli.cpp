@@ -376,7 +376,6 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         std::endl;
         int beds_count;
         std::string roomID, check_in, check_out;
-        // use read line to read a line
         char* line = readline("> ");
         if (line == nullptr)
             return;
@@ -402,6 +401,49 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         if (!is_server_up)
             return;
         json j = json::parse(last_response);
+        show_simple_json(j);
+    }
+    else if (command=="5" || command=="5_cancelling" || command=="cancelling")
+    {
+        LOG(INFO) << "Canceling a reservation/ requesting to view reservations...";
+        add_history(command.c_str());
+        std::string request = decode::get_reservations(token);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
+        json j = json::parse(last_response);
+        show_simple_json(j);
+        if(j["kind"] != "success")
+            return;
+        std::string data = j["data"];
+        print_reservations(data);
+        std::cout << "command format: cancel <room number> <number of bed(s)>" << std::endl;
+        std::string roomID;
+        int beds_count;
+        char* line = readline("> ");
+        if (line == nullptr)
+            return;
+        std::string line_str(line), t_cmd;
+        std::istringstream line_stream(line_str);
+        line_stream >> t_cmd;
+        if(line_stream.eof() || t_cmd != "cancel") return;
+        line_stream >> roomID;
+        if(line_stream.eof()) return;
+        line_stream >> beds_count;
+        if(!line_stream.eof()) return;
+        add_history(line);
+        free(line);
+        request = decode::cancel_booking(token, roomID, beds_count);
+        sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
+        j = json::parse(last_response);
         show_simple_json(j);
     }
     else
@@ -464,7 +506,7 @@ void print_room_info(json room_data){
     std::cout << "Users:" << std::endl;
     for (std::string jj : room_data["users"]) {
         json j = json::parse(jj);
-        std::cout<< "+-  ";
+        std::cout<< "*-  ";
         for (auto& key : valid_user_rows) {
             if (!j.contains(key))
                 continue;
@@ -487,4 +529,27 @@ void print_rooms_info(std::string rooms_data){
         print_room_info(j);
     }
     std::cout<< "------------------------------" << std::endl;
+}
+
+void print_reservations(std::string reservations_data){
+    std::cout<< "Reservations:" << std::endl;
+    std::string keys[] = {
+            "room number", "price(per bed)", "bed(s) you have", "check in", "check out"
+    };
+    auto rd = json::parse(reservations_data);
+    for (std::string jj : rd) {
+        json j = json::parse(jj);
+        std::cout<< "*****" << std::endl;
+        for (auto& key : keys) {
+            if (!j.contains(key))
+                continue;
+            if (key != "room number")
+                print_element("", 4);
+            print_element(key, 15);
+            print_element(":", 2);
+            print_element((j[key]), 30);
+            std::cout << std::endl;
+        }
+    }
+    std::cout<< "-----" << std::endl;
 }

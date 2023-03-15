@@ -257,11 +257,11 @@ void UserManager::save(std::string path){
 }
 
 void UserManager::client_dead(int fd) {
-    for(int i=0; i < users.size(); i++)
-        if(fd == users[i].socket_fd && users[i].is_logged_in){
-            users[i].token="";
-            users[i].socket_fd=-1;
-            users[i].is_logged_in=false;
+    for (int i = 0; i < users.size(); i++)
+        if (fd == users[i].socket_fd && users[i].is_logged_in) {
+            users[i].token = "";
+            users[i].socket_fd = -1;
+            users[i].is_logged_in = false;
             LOG(INFO) << "Client dead (" << users[i].username << ")";
             return;
         }

@@ -72,7 +72,7 @@ std::string decode::get_reservations(std::string& token){
     return j.dump();
 }
 
-std::string decode::cancel_booking(std::string& token, int roomID, int n_beds){
+std::string decode::cancel_booking(std::string& token, std::string roomID, int n_beds){
     json j;
     j["kind"] = "canceling";
     j["token"] = token;
