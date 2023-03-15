@@ -489,14 +489,14 @@ void print_user_info(json user_data){
 }
 
 void print_users_info(std::string users_data){
-    std::cout<< "Users information:" << std::endl;
+    std::cout<< "*-----Users information-----*" << std::endl;
     auto ud = json::parse(users_data);
     for (std::string jj : ud) {
         json j = json::parse(jj);
-        std::cout<< "+++" << std::endl;
+        std::cout<< "*-----*" << std::endl;
         print_user_info(j);
     }
-    std::cout<< "---" << std::endl;
+    std::cout<< "*-------------||-------------*" << std::endl;
 }
 
 void print_room_info(json room_data){
@@ -552,7 +552,7 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
         return;
     std::string data = j["data"];
     print_reservations(data);
-    std::cout << "command format: cancel <room number> <number of bed(s)>" << std::endl;
+    std::cout << "- command format: cancel <room number> <number of bed(s)>" << std::endl;
     std::string roomID;
     int beds_count;
     char* line = readline("> ");
@@ -581,25 +581,25 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
 }
 
 void print_rooms_info(std::string rooms_data){
-    std::cout<< "- Rooms information:" << std::endl;
+    std::cout<< "*-----Rooms information-----*" << std::endl;
     auto rd = json::parse(rooms_data);
     for (std::string jj : rd) {
         json j = json::parse(jj);
-        std::cout<< "*********************************" << std::endl;
+        std::cout<< "*++++++++++*" << std::endl;
         print_room_info(j);
     }
-    std::cout<< "------------------------------" << std::endl;
+    std::cout<< "*-------------||------------*" << std::endl;
 }
 
 void print_reservations(std::string reservations_data){
-    std::cout<< "Reservations:" << std::endl;
+    std::cout<< "*-----Reservations-----*" << std::endl;
     std::string keys[] = {
             "room number", "price(per bed)", "bed(s) you have", "check in", "check out"
     };
     auto rd = json::parse(reservations_data);
     for (std::string jj : rd) {
         json j = json::parse(jj);
-        std::cout<< "*****" << std::endl;
+        std::cout<< "*++++++++++*" << std::endl;
         for (auto& key : keys) {
             if (!j.contains(key))
                 continue;
@@ -611,7 +611,7 @@ void print_reservations(std::string reservations_data){
             std::cout << std::endl;
         }
     }
-    std::cout<< "-----" << std::endl;
+    std::cout<< "*----------||----------*" << std::endl;
 }
 
 void Command::pass_day(std::string cmd, int server_fd) {
@@ -620,7 +620,7 @@ void Command::pass_day(std::string cmd, int server_fd) {
     stream >> command;
     LOG(INFO) << "Updating system's date...";
     add_history(command.c_str());
-    std::cout << "command format: passDay <number of days>" << std::endl;
+    std::cout << "- command format: passDay <number of days>" << std::endl;
     int days;
     char* line = readline("> ");
     if (line == nullptr)
@@ -673,11 +673,11 @@ void Command::edit_information(std::string command, int server_fd) {
     }
     bool extend = ud.contains("address");
     std::cout << "You can change one of the following information at this time, here is their format:" << std::endl;
-    std::cout << "command: password <new password>" << std::endl;
+    std::cout << "- command: password <new password>" << std::endl;
     if (extend)
-        std::cout << "command: phone <new phone number>" << std::endl;
+        std::cout << "- command: phone <new phone number>" << std::endl;
     if (extend)
-        std::cout << "command: address <new address>" << std::endl;
+        std::cout << "- command: address <new address>" << std::endl;
 
     char* line = readline("> ");
     if (line == nullptr)
