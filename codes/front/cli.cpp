@@ -69,107 +69,105 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
     std::string command;
     stream >> command;
 
-    if (command == "help")
-    {
+    if (command == "help") {
         std::cout << help_prompt << std::endl;
         add_history(command.c_str());
     }
     else if (command == "quit" || command == "exit")
-    {
         exit(0);
-    }
     else if (command == "verbose+")
-    {
         FLAGS_minloglevel = 1;
-    }
     else if (command == "verbose++")
-    {
         FLAGS_minloglevel = 0;
-    }
     else if (command == "verbose-")
-    {
         FLAGS_minloglevel = 3;
-    }
     else if (command == "signup")
-    {
-        LOG(INFO) << "Signup menu...";
-        add_history(command.c_str());
-        std::string password, phone, address;
-        int balance;
-        if (stream.eof()) {
-            std::cerr << "Wrong command format!" << std::endl;
-            return;
-        }
-        stream >> username;
-        if (!stream.eof() || username=="" || username=="signup")
-        {
-            std::cerr << "Wrong command format!" << std::endl;
-            return;
-        }
-        std::string request = decode::check_username_is_free(username);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        if (j["kind"]=="error"){
-            show_simple_json(j);
-            return;
-        }
-        std::cout << "password: ";
-        std::cin >> password;
-        std::cout << "purse: ";
-        std::cin >> balance;
-        std::cout << "phone: ";
-        std::cin >> phone;
-        address = readline("address: ");
-        request = decode::sign_up(username, password,balance, phone, address);
-        sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        j = json::parse(last_response);
-        show_simple_json(j);
-    }
+        signup(cmd, server_fd);
     else if (command == "signin")
-    {
-        LOG(INFO) << "Signin menu...";
-        add_history(command.c_str());
-        stream >> username;
-        if (username == "signin")
-        {
-            std::cerr << "Wrong command format!" << std::endl;
-            return;
-        }
-        stream >> password;
-        std::string request = decode::sign_in(username, password);
-        LOG(INFO) << "Sending login data...";
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        if (j["kind"]=="error"){
-            return;
-        }
-        token = j["token"];
-        logged_in=true;
-        clear_history();
-    }
+        login(cmd, server_fd);
     else if(command == "clear")
-    {
         std::cout << "\x1B[2J\x1B[H";
-    }
-    else
-    {
+    else{
         std::cerr << "Unknown command: '" << command << "'" << std::endl;
         std::cout << help_prompt << std::endl;
     }
+}
+
+void Command::signup(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Signup menu...";
+    add_history(command.c_str());
+    std::string password, phone, address;
+    int balance;
+    if (stream.eof()) {
+        std::cerr << "Wrong command format!" << std::endl;
+        return;
+    }
+    stream >> username;
+    if (!stream.eof() || username=="" || username=="signup")
+    {
+        std::cerr << "Wrong command format!" << std::endl;
+        return;
+    }
+    std::string request = decode::check_username_is_free(username);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    if (j["kind"]=="error"){
+        show_simple_json(j);
+        return;
+    }
+    std::cout << "password: ";
+    std::cin >> password;
+    std::cout << "purse: ";
+    std::cin >> balance;
+    std::cout << "phone: ";
+    std::cin >> phone;
+    address = readline("address: ");
+    request = decode::sign_up(username, password,balance, phone, address);
+    sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    j = json::parse(last_response);
+    show_simple_json(j);
+}
+
+void Command::login(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Signin menu...";
+    add_history(command.c_str());
+    stream >> username;
+    if (username == "signin")
+    {
+        std::cerr << "Wrong command format!" << std::endl;
+        return;
+    }
+    stream >> password;
+    std::string request = decode::sign_in(username, password);
+    LOG(INFO) << "Sending login data...";
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    if (j["kind"]=="error"){
+        return;
+    }
+    token = j["token"];
+    logged_in=true;
+    clear_history();
 }
 
 void Command::recover_state(int server_fd) {
@@ -278,181 +276,162 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         std::cout << "Implement help prompt" << std::endl;
     }
     else if (command == "quit" || command == "exit")
-    {
         exit(0);
-    }
     else if (command == "verbose+")
-    {
         FLAGS_minloglevel = 1;
-    }
     else if (command == "verbose++")
-    {
         FLAGS_minloglevel = 0;
-    }
     else if (command == "verbose-")
-    {
         FLAGS_minloglevel = 3;
-    }
     else if (command == "clear")
-    {
         std::cout << "\x1B[2J\x1B[H";
-    }
     else if (command=="0" || command=="0_logout" || command=="logout")
-    {
-        LOG(INFO) << "Logging out...";
-        add_history(command.c_str());
-        std::string request = decode::logout(token);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        token="";
-        logged_in=false;
-        username="";
-    }
+        logout(cmd, server_fd);
     else if (command=="1" || command=="1_view_user_information" || command=="view_user_information")
-    {
-        LOG(INFO) << "Getting user data...";
-        add_history(command.c_str());
-        std::string request = decode::get_user_info(token);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        std::string udata = j["data"];
-        json ud = json::parse(udata);
-        if(j["kind"]=="success") {
-            std::cout<< "User account's information:" << std::endl;
-            print_user_info(ud);
-            std::cout<< "---" << std::endl;
-        }
-    }
-    else if (command=="2" || command=="2_view_all_users" || command=="view_all_users"){
-        LOG(INFO) << "Getting all users data...";
-        add_history(command.c_str());
-        std::string request = decode::get_users(token);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        std::string udata = j["data"];
-        if(j["kind"]=="success")
-            print_users_info(udata);
-    }
+        view_user_info(cmd, server_fd);
+    else if (command=="2" || command=="2_view_all_users" || command=="view_all_users")
+        view_users(cmd, server_fd);
     else if (command=="3" || command=="3_view_rooms_information" || command=="view_rooms_information")
-    {
-        LOG(INFO) << "Getting rooms information...";
-        add_history(command.c_str());
-        std::string request = decode::get_rooms_info(token);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        std::string udata = j["data"];
-        if(j["kind"]=="success")
-            print_rooms_info(udata);
-    }
+        view_rooms(cmd, server_fd);
     else if (command=="4" || command=="4_booking" || command=="booking")
-    {
-        LOG(INFO) << "Booking a room...";
-        std::cout <<
-        "Command format: book <room_number> <beds_count> <check_in_date(dd-mm-yyyy)> <check_out_date(dd-mm-yyyy)>" <<
-        std::endl;
-        int beds_count;
-        std::string roomID, check_in, check_out;
-        char* line = readline("> ");
-        if (line == nullptr)
-            return;
-        std::string line_str(line), t_cmd;
-        std::istringstream line_stream(line_str);
-        line_stream >> t_cmd;
-        if(line_stream.eof() || t_cmd != "book") return;
-        line_stream >> roomID;
-        if(line_stream.eof()) return;
-        line_stream >> beds_count;
-        if(line_stream.eof()) return;
-        line_stream >> check_in;
-        if(line_stream.eof()) return;
-        line_stream >> check_out;
-        if(!line_stream.eof()) return;
-        add_history(line);
-        free(line);
-        std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-    }
+        book_room(cmd, server_fd);
     else if (command=="5" || command=="5_cancelling" || command=="cancelling")
-    {
-        LOG(INFO) << "Canceling a reservation/ requesting to view reservations...";
-        add_history(command.c_str());
-        std::string request = decode::get_reservations(token);
-        bool sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        json j = json::parse(last_response);
-        show_simple_json(j);
-        if(j["kind"] != "success")
-            return;
-        std::string data = j["data"];
-        print_reservations(data);
-        std::cout << "command format: cancel <room number> <number of bed(s)>" << std::endl;
-        std::string roomID;
-        int beds_count;
-        char* line = readline("> ");
-        if (line == nullptr)
-            return;
-        std::string line_str(line), t_cmd;
-        std::istringstream line_stream(line_str);
-        line_stream >> t_cmd;
-        if(line_stream.eof() || t_cmd != "cancel") return;
-        line_stream >> roomID;
-        if(line_stream.eof()) return;
-        line_stream >> beds_count;
-        if(!line_stream.eof()) return;
-        add_history(line);
-        free(line);
-        request = decode::cancel_booking(token, roomID, beds_count);
-        sent = send_message(server_fd, request);
-        if (!sent)
-            return;
-        is_server_up = receive_data(server_fd,last_response);
-        if (!is_server_up)
-            return;
-        j = json::parse(last_response);
-        show_simple_json(j);
-    }
+        cancel_reservation(cmd, server_fd);
+//    else if (command=="6" || command=="6_pass_day" || command=="pass_day")
+//        pass_day(cmd, server_fd);
+//    else if (command=="7" || command=="7_edit_information" || command=="edit_information")
+//        edit_information(cmd, server_fd);
+//    else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
+//        leave_room(cmd, server_fd);
+//    else if (command=="9" || command=="9_rooms" || command=="rooms")
+//        hotel_management(cmd, server_fd);
     else
-    {
         std::cerr << "Unknown command: '" << command << "'\n" <<
                      "::use <help> command to learn about commands" << std::endl;
-    }
     std::cout << "Press <Enter> to continue...";
     std::cin.get();
+}
+
+void Command::logout(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Logging out...";
+    add_history(command.c_str());
+    std::string request = decode::logout(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    token="";
+    logged_in=false;
+    username="";
+}
+
+void Command::view_user_info(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Getting user data...";
+    add_history(command.c_str());
+    std::string request = decode::get_user_info(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    std::string udata = j["data"];
+    json ud = json::parse(udata);
+    if(j["kind"]=="success") {
+        std::cout<< "User account's information:" << std::endl;
+        print_user_info(ud);
+        std::cout<< "---" << std::endl;
+    }
+}
+
+void Command::view_users(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Getting all users data...";
+    add_history(command.c_str());
+    std::string request = decode::get_users(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    std::string udata = j["data"];
+    if(j["kind"]=="success")
+        print_users_info(udata);
+}
+
+void Command::view_rooms(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Getting rooms information...";
+    add_history(command.c_str());
+    std::string request = decode::get_rooms_info(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    std::string udata = j["data"];
+    if(j["kind"]=="success")
+        print_rooms_info(udata);
+}
+
+void Command::book_room(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Booking a room...";
+    std::cout <<
+              "Command format: book <room_number> <beds_count> <check_in_date(dd-mm-yyyy)> <check_out_date(dd-mm-yyyy)>" <<
+              std::endl;
+    int beds_count;
+    std::string roomID, check_in, check_out;
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd;
+    std::istringstream line_stream(line_str);
+    line_stream >> t_cmd;
+    if(line_stream.eof() || t_cmd != "book") return;
+    line_stream >> roomID;
+    if(line_stream.eof()) return;
+    line_stream >> beds_count;
+    if(line_stream.eof()) return;
+    line_stream >> check_in;
+    if(line_stream.eof()) return;
+    line_stream >> check_out;
+    if(!line_stream.eof()) return;
+    add_history(line);
+    free(line);
+    std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
 }
 
 template<typename T>
@@ -518,6 +497,52 @@ void print_room_info(json room_data){
             std::cout << std::endl;
         }
     }
+}
+
+void Command::cancel_reservation(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Canceling a reservation/ requesting to view reservations...";
+    add_history(command.c_str());
+    std::string request = decode::get_reservations(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+    if(j["kind"] != "success")
+        return;
+    std::string data = j["data"];
+    print_reservations(data);
+    std::cout << "command format: cancel <room number> <number of bed(s)>" << std::endl;
+    std::string roomID;
+    int beds_count;
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd;
+    std::istringstream line_stream(line_str);
+    line_stream >> t_cmd;
+    if(line_stream.eof() || t_cmd != "cancel") return;
+    line_stream >> roomID;
+    if(line_stream.eof()) return;
+    line_stream >> beds_count;
+    if(!line_stream.eof()) return;
+    add_history(line);
+    free(line);
+    request = decode::cancel_booking(token, roomID, beds_count);
+    sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    j = json::parse(last_response);
+    show_simple_json(j);
 }
 
 void print_rooms_info(std::string rooms_data){

@@ -31,6 +31,20 @@ private:
     static char** reservation_command_completion(const char* text, int start, int end);
     void execute_reservation_command(const std::string& cmd, int server_fd);
     void execute_initial_state_command(const std::string& cmd, int server_fd);
+
+    void logout(std::string command, int server_fd);
+    void login(std::string command, int server_fd);
+    void signup(std::string command, int server_fd);
+    void view_user_info(std::string command, int server_fd);
+    void view_users(std::string command, int server_fd);
+    void view_rooms(std::string command, int server_fd);
+    void book_room(std::string command, int server_fd);
+    void cancel_reservation(std::string command, int server_fd);
+    void pass_day(std::string command, int server_fd); // TODO: Implement this
+    void edit_information(std::string command, int server_fd); // TODO: Implement this
+    void leave_room(std::string command, int server_fd); // TODO: Implement this
+    void hotel_management(std::string command, int server_fd); // TODO: Implement this
+
 };
 
 void show_simple_json(json j);
