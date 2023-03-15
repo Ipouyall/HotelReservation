@@ -46,7 +46,7 @@ void signalHandler(int signum) {
 void setUP_client(char const * name) {
     google::InitGoogleLogging(name);
     google::InstallFailureSignalHandler();
-    FLAGS_minloglevel=0;
+    FLAGS_minloglevel=3;
     FLAGS_colorlogtostderr = true;
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
