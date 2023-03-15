@@ -49,7 +49,7 @@ public:
     void printINfo();
     bool reduce_balance(std::string token, int price);
     bool increase_balance(std::string token, int amount);
-    bool edit_information(std::string token, std::string new_pass, std::string phone, std::string addr);
+    bool edit_information(std::string token, std::string new_pass="", std::string phone="", std::string addr="");
     int get_id(std::string token);
     bool have_enough_money(std::string token, int price);
     void save(std::string path);

@@ -63,6 +63,8 @@ std::string Server::diagnose(std::string command, int client_fd) {
         rsp = cancel_a_room(json_data_in, um, hm);
     else if (cmd == "passing_time")
         rsp = pass_days(json_data_in, um, hm);
+    else if (cmd == "edit_information")
+        rsp = edit_user_info(json_data_in, um);
     return rsp;
 }
 
@@ -280,6 +282,19 @@ std::string Server::pass_days(json &j_in, UserManager &um, HotelManager &hm) {
     today_date = dateManager::inc_days(today_date, days);
     hm.update_date(today_date);
     return response("success", "110", "System's date updated successfully").dump();
+}
+
+std::string Server::edit_user_info(json &j_in, UserManager &um) {
+    LOG(INFO) << "New request for editing user info received";
+    std::string token = j_in["token"];
+    std::string new_pass, new_phone, new_addr;
+    new_pass = j_in.contains("pass") ? j_in["pass"] : "";
+    new_phone = j_in.contains("phone") ? j_in["phone"] : "";
+    new_addr = j_in.contains("addr") ? j_in["addr"] : "";
+    if (um.edit_information(token, new_pass, new_phone, new_addr))
+        return response("success", "110", "User information updated successfully").dump();
+    else
+        return response("error", "503", "Operation failed, please try again later").dump();
 }
 
 void Server::rewrite_data() {

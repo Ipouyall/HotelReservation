@@ -89,11 +89,11 @@ std::string decode::passing_time(std::string& token, int days){
     return j.dump();
 }
 
-std::string decode::edit_information(std::string& token, std::string& new_pass, std::string phone, std::string addr){
+std::string decode::edit_information(std::string& token, std::string new_pass, std::string phone, std::string addr){
     json j;
     j["kind"] = "edit_information";
     j["token"] = token;
-    j["new_pass"] = new_pass;
+    j["pass"] = new_pass;
     j["phone"] = phone;
     j["addr"] = addr;
     return j.dump();

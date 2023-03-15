@@ -300,8 +300,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         cancel_reservation(cmd, server_fd);
     else if (command=="6" || command=="6_pass_day" || command=="pass_day")
         pass_day(cmd, server_fd);
-//    else if (command=="7" || command=="7_edit_information" || command=="edit_information")
-//        edit_information(cmd, server_fd);
+    else if (command=="7" || command=="7_edit_information" || command=="edit_information")
+        edit_information(cmd, server_fd);
 //    else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
 //        leave_room(cmd, server_fd);
 //    else if (command=="9" || command=="9_rooms" || command=="rooms")
@@ -351,9 +351,9 @@ void Command::view_user_info(std::string cmd, int server_fd) {
     std::string udata = j["data"];
     json ud = json::parse(udata);
     if(j["kind"]=="success") {
-        std::cout<< "User account's information:" << std::endl;
+        std::cout<< "*----User profile's information----*" << std::endl;
         print_user_info(ud);
-        std::cout<< "---" << std::endl;
+        std::cout<< "*----------------||----------------*" << std::endl;
     }
 }
 
@@ -646,5 +646,80 @@ void Command::pass_day(std::string cmd, int server_fd) {
     if (!is_server_up)
         return;
     json j = json::parse(last_response);
+    show_simple_json(j);
+}
+
+void Command::edit_information(std::string command, int server_fd) {
+    LOG(INFO) << "Getting previous information...";
+    std::string request = decode::get_user_info(token);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    std::string udata = j["data"];
+    json ud = json::parse(udata);
+    if(j["kind"]=="success") {
+        std::cout<< "*----Your profile----*" << std::endl;
+        print_user_info(ud);
+        std::cout<< "*---------||---------*" << std::endl;
+    }
+    else
+    {
+        show_simple_json(j);
+        return;
+    }
+    bool extend = ud.contains("address");
+    std::cout << "You can change one of the following information at this time, here is their format:" << std::endl;
+    std::cout << "command: password <new password>" << std::endl;
+    if (extend)
+        std::cout << "command: phone <new phone number>" << std::endl;
+    if (extend)
+        std::cout << "command: address <new address>" << std::endl;
+
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd, n_pass="", n_phone="", n_address="";
+    std::istringstream line_stream(line_str);
+    free(line);
+    line_stream >> t_cmd;
+    if(line_stream.eof()) {
+        std::cout << "Invalid command: No argument!" << std::endl;
+        return;
+    }
+    if(t_cmd == "password")
+        line_stream >> n_pass;
+    if(t_cmd == "phone") {
+        if(!extend) {
+            std::cout << "Invalid command: You can't change your phone number!" << std::endl;
+            return;
+        }
+        line_stream >> n_phone;
+    }
+    if(t_cmd == "address") {
+        if(!extend) {
+            std::cout << "Invalid command: You can't change your address!" << std::endl;
+            return;
+        }
+        line_stream >> n_address;
+        std::string temp;
+        while(line_stream >> temp)
+            n_address += " " + temp;
+    }
+    if(n_pass == "" && n_phone == "" && n_address == "") {
+        std::cout << "There is nothing to change!" << std::endl;
+        return;
+    }
+    request = decode::edit_information(token, n_pass, n_phone, n_address);
+    sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    j = json::parse(last_response);
     show_simple_json(j);
 }

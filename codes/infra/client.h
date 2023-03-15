@@ -25,7 +25,7 @@ namespace decode {
 
     std::string passing_time(std::string& token, int days);
 
-    std::string edit_information(std::string& token, std::string& new_pass, std::string phone="", std::string addr="");
+    std::string edit_information(std::string& token, std::string new_pass="", std::string phone="", std::string addr="");
 
     std::string leave_room(std::string& token, int roomID);
     std::string empty_room(std::string& token, int roomID);

@@ -202,20 +202,23 @@ bool UserManager::increase_balance(std::string token, int amount){
     return false;
 }
 
-bool UserManager::edit_information(std::string token, std::string new_pass, 
-                                    std::string phone="", std::string addr=""){
-    if(new_pass == "")
-        return false;
+bool UserManager::edit_information(std::string token, std::string new_pass,
+                                    std::string phone, std::string addr) {
     int index = search_by_token(token);
-    if(index != -1){
+    if (index == -1)
+        return false;
+    if (new_pass != "")
         users[index].password = new_pass;
-        if(users[index].privilege) 
-            return true;
-        users[index].address = addr;
-        users[index].phone_number = phone;
+    if (users[index].privilege)
         return true;
+    if (phone != "") {
+        if (phone.size() != 11 && phone.size() != 13 && phone.size() != 14)
+            return false;
+        users[index].phone_number = phone;
     }
-    return false;
+    if (addr != "")
+        users[index].address = addr;
+    return true;
 }
 
 int UserManager::get_id(std::string token){
