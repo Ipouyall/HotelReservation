@@ -70,6 +70,7 @@ json Server::response(std::string kind, std::string status_code, std::string msg
     rsp["status_code"] = status_code;
     rsp["status"] = status_msg;
     rsp["message"] = msg;
+    rsp["time"] = dateManager::get_string(today_date);
     return rsp;
 }
 

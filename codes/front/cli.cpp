@@ -9,7 +9,8 @@
 void show_simple_json(json j){
     std::cout << (j["kind"] == "error" ? "\033[1;31m" : "" ) <<
     j["status_code"] << ":" << j["status"] << "\n::::::" <<
-    j["message"] << "\033[0m" << std::endl;
+    j["message"] << "\n::::::" << j["time"] <<
+    "\033[0m" << std::endl;
 }
 
 Command::Command() {
@@ -407,20 +408,53 @@ void Command::book_room(std::string cmd, int server_fd) {
     int beds_count;
     std::string roomID, check_in, check_out;
     char* line = readline("> ");
-    if (line == nullptr)
+    if (line == nullptr) {
+        std::cout << "Error in reading prompt!" << std::endl;
         return;
+    }
     std::string line_str(line), t_cmd;
     std::istringstream line_stream(line_str);
     line_stream >> t_cmd;
-    if(line_stream.eof() || t_cmd != "book") return;
+    if(t_cmd != "book") {
+        std::cout << "Wrong format, command should start with 'book'!" << std::endl;
+        return;
+    }
+    if(line_stream.eof()) {
+        std::cout << "You need to specify arguments!" << std::endl;
+        return;
+    }
     line_stream >> roomID;
-    if(line_stream.eof()) return;
+    if(line_stream.eof()) {
+        std::cout << (
+                roomID != "" ?
+                "Just provided roomNumber, you should specify all arguments!" :
+                "Just provided ???, you should specify all arguments!") << std::endl;
+        return;
+    }
     line_stream >> beds_count;
-    if(line_stream.eof()) return;
+    if(line_stream.eof()){
+        std::cout << "Just provided roomNum+bedCount, you should specify all arguments!" << std::endl;
+        return;
+    }
     line_stream >> check_in;
-    if(line_stream.eof()) return;
+    if(line_stream.eof()) {
+        std::cout << (
+                check_in != "" ?
+                "Just provided roomNum+bedCount+checkInDate, you should specify all arguments!" :
+                "Just provided roomNum+bedCount+???, you should specify all arguments!") << std::endl;
+        return;
+    }
     line_stream >> check_out;
-    if(!line_stream.eof()) return;
+    if (check_out == "") {
+        std::cout << "Just provided roomNum+bedCount+checkInDate+???, you should specify all arguments!" << std::endl;
+        return;
+    }
+    std::string temp;
+    line_stream >> temp;
+    if(!line_stream.eof() && temp!="") {
+        std::cout << "Too many argument!" << std::endl;
+        return;
+    }
     add_history(line);
     free(line);
     std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
