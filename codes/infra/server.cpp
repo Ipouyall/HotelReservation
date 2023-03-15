@@ -19,9 +19,10 @@ serverConfig get_server_config(std::string path) {
 
 Server::Server() {
     LOG(INFO) << "Initializing Server...";
+    set_time();
     config = get_server_config(DEFAULT_SERVER_PATH);
     um = UserManager();
-    hm = HotelManager(); // TODO: set current-time before this and use the other constructor
+    hm = HotelManager(today_date);
     errors = readJsonFile(DEFAULT_ERRORS_PATH);
     fd = setupServer(config.host_name.c_str(), config.port);
 }
@@ -60,6 +61,8 @@ std::string Server::diagnose(std::string command, int client_fd) {
         rsp = view_reservations(json_data_in, um, hm);
     else if (cmd == "canceling")
         rsp = cancel_a_room(json_data_in, um, hm);
+    else if (cmd == "passing_time")
+        rsp = pass_days(json_data_in, um, hm);
     return rsp;
 }
 
@@ -265,4 +268,35 @@ std::string Server::cancel_a_room(json &j_in, UserManager &um, HotelManager &hm)
     um.increase_balance(token, price_back);
     return response("success", "110", "Reservation canceled successfully").dump();
 
+}
+
+std::string Server::pass_days(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for passing days received";
+    std::string token = j_in["token"];
+    UserRole role = um.get_role(token);
+    if (role != UserRole::ADMIN)
+        return response("error", "403", "Only admins can pass days").dump();
+    int days = j_in["days"];
+    today_date = dateManager::inc_days(today_date, days);
+    hm.update_date(today_date);
+    return response("success", "110", "System's date updated successfully").dump();
+}
+
+void Server::rewrite_data() {
+    LOG(INFO) << "Rewriting data...";
+    um.save(DEFAULT_USERS_PATH);
+    hm.save(DEFAULT_HOTEL_PATH);
+}
+
+void Server::set_time() {
+    LOG(INFO) << "Setting time...";
+    std::string t_time;
+    std::cout << "Enter today's date (dd-mm-yyyy): ";
+    std::cin >> t_time;
+    while (!dateManager::valid_format(t_time)) {
+        std::cout << "Invalid date format, try again!" << std::endl;
+        std::cout << "Enter today's date (dd-mm-yyyy): ";
+        std::cin >> t_time;
+    }
+    today_date = dateManager::convert(t_time);
 }

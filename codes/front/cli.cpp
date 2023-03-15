@@ -298,8 +298,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         book_room(cmd, server_fd);
     else if (command=="5" || command=="5_cancelling" || command=="cancelling")
         cancel_reservation(cmd, server_fd);
-//    else if (command=="6" || command=="6_pass_day" || command=="pass_day")
-//        pass_day(cmd, server_fd);
+    else if (command=="6" || command=="6_pass_day" || command=="pass_day")
+        pass_day(cmd, server_fd);
 //    else if (command=="7" || command=="7_edit_information" || command=="edit_information")
 //        edit_information(cmd, server_fd);
 //    else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
@@ -413,6 +413,7 @@ void Command::book_room(std::string cmd, int server_fd) {
         return;
     }
     std::string line_str(line), t_cmd;
+    free(line);
     std::istringstream line_stream(line_str);
     line_stream >> t_cmd;
     if(t_cmd != "book") {
@@ -455,8 +456,7 @@ void Command::book_room(std::string cmd, int server_fd) {
         std::cout << "Too many argument!" << std::endl;
         return;
     }
-    add_history(line);
-    free(line);
+    add_history(line_str.c_str());
     std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -559,6 +559,7 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
     if (line == nullptr)
         return;
     std::string line_str(line), t_cmd;
+    free(line);
     std::istringstream line_stream(line_str);
     line_stream >> t_cmd;
     if(line_stream.eof() || t_cmd != "cancel") return;
@@ -566,8 +567,8 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
     if(line_stream.eof()) return;
     line_stream >> beds_count;
     if(!line_stream.eof()) return;
-    add_history(line);
-    free(line);
+    add_history(line_str.c_str());
+
     request = decode::cancel_booking(token, roomID, beds_count);
     sent = send_message(server_fd, request);
     if (!sent)
@@ -611,4 +612,39 @@ void print_reservations(std::string reservations_data){
         }
     }
     std::cout<< "-----" << std::endl;
+}
+
+void Command::pass_day(std::string cmd, int server_fd) {
+    std::istringstream stream(cmd);
+    std::string command;
+    stream >> command;
+    LOG(INFO) << "Updating system's date...";
+    add_history(command.c_str());
+    std::cout << "command format: passDay <number of days>" << std::endl;
+    int days;
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd;
+    std::istringstream line_stream(line_str);
+    line_stream >> t_cmd;
+    if(line_stream.eof() || t_cmd != "passDay") {
+        std::cout << "Invalid command: Command should starts with 'passDay'!" << std::endl;
+        return;
+    }
+    line_stream >> days;
+    if(!line_stream.eof()) {
+        std::cout << "Invalid command: Too many arguments!" << std::endl;
+        return;
+    }
+    add_history(line_str.c_str());
+    std::string request = decode::passing_time(token, days);
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
 }
