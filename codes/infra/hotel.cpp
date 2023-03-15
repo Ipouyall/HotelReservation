@@ -135,25 +135,27 @@ bool HotelRoom::left_user(int user_id){
     return true;
 }
 
-json HotelRoom::get_data_json(bool include_users){
+json HotelRoom::get_data_json(bool include_users) {
     json j;
     j["number"] = room_number;
     j["status"] = is_full;
     j["total beds"] = max_capacity;
     j["available bed"] = current_capacity;
     j["price(each bed)"] = price_per_bed;
-    if(include_users){
-        auto users_json = json::array();
-        for(int i = 0;i < users.size();i++){
-            users_json.push_back({
-                {"id", users[i].id},
-                {"beds", users[i].number_of_reservation},
-                {"check-in", dateManager::get_string(users[i].reserve_date)},
-                {"check-out", dateManager::get_string(users[i].checkout_date)}
-            });
-        }
-        j["users"] = users_json;
+    if (!include_users)
+        return j;
+    auto users_json = json::array();
+    for (int i = 0; i < users.size(); i++) {
+        json user;
+        user["id"] = users[i].id;
+        user["beds"] = users[i].number_of_reservation;
+        user["check-in"] = dateManager::get_string(users[i].reserve_date);
+        user["check-out"] = dateManager::get_string(users[i].checkout_date);
+
+        users_json.push_back(user.dump());
     }
+    j["users"] = users_json;
+
     return j;
 }
 
@@ -404,7 +406,7 @@ bool HotelManager::modify_validation(std::string room_num, int new_max_capacity)
 std::string HotelManager::get_rooms_data(bool include_users){
     auto rooms_json = json::array();
     for(int i = 0;i < rooms.size();i++){
-        rooms_json.push_back(rooms[i].get_data_json(include_users));
+        rooms_json.push_back(rooms[i].get_data_json(include_users).dump());
     }
     return rooms_json.dump();
 }

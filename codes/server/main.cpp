@@ -42,6 +42,7 @@ int main(int argc, char *argv[]) {
     fd_set master_set, working_set;
     auto server = Server();
     auto users = UserManager();
+    auto hotel = HotelManager();
 
     server_fd = server.get_fd();
 
@@ -71,7 +72,7 @@ int main(int argc, char *argv[]) {
                 }
 
                 LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl;
-                std::string response = server.diagnose(bufferString, users, i);
+                std::string response = server.diagnose(bufferString, users, hotel, i);
                 if (send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
                     LOG(INFO) << "Your response sent";
                 else

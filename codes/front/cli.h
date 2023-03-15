@@ -1,7 +1,3 @@
-//
-// Created by Pooya Sadeghi on 2023-03-12.
-//
-
 #ifndef CODES_CLI_H
 #define CODES_CLI_H
 #include <iostream>
@@ -40,5 +36,7 @@ private:
 void show_simple_json(json j);
 void print_user_info(json user_data);
 void print_users_info(std::string users_data);
+void print_room_info(json room_data);
+void print_rooms_info(std::string rooms_data);
 
 #endif //CODES_CLI_H

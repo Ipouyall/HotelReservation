@@ -30,6 +30,7 @@ typedef struct HotelRoom{
     int max_capacity;
     int current_capacity;
     std::vector<RoomUser> users;
+
     bool check_user_reserved(int user_id);
     int search_user_by_id(int user_id);
     ReservationDetail get_user_reservation(int user_id);

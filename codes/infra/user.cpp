@@ -159,7 +159,8 @@ bool UserManager::logout(std::string token){
 
 UserRole UserManager::get_role(std::string token){
     int index = search_by_token(token);
-    
+    if (index == -1)
+        return UserRole::NONE;
     return users[index].privilege ? UserRole::ADMIN : UserRole::USER;
 }
 

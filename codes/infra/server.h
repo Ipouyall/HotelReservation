@@ -3,6 +3,7 @@
 #include <nlohmann/json.hpp>
 #include "filehandler.h"
 #include "user.h"
+#include "hotel.h"
 #include <string>
 
 using json = nlohmann::json;
@@ -27,7 +28,7 @@ private:
 public:
     Server();
     int get_fd();
-    std::string diagnose(std::string command, UserManager& um, int client_fd);
+    std::string diagnose(std::string command, UserManager& um, HotelManager& hm, int client_fd);
 
 private:
     json response(std::string kind, std::string status_code, std::string msg);
@@ -37,7 +38,7 @@ private:
     std::string logout(json& j_in, UserManager& um);
     std::string view_user_information(json& j_in, UserManager& um);
     std::string view_all_users(json& j_in, UserManager& um);
-    std::string view_rooms_info(); // TODO: implement dependency
+    std::string view_rooms_info(json& j_in, UserManager& um, HotelManager& hm);
     std::string book_a_room(); // TODO: implement dependency
     std::string cancel_a_room(); // TODO: implement dependency
     std::string pass_days(); // TODO: implement dependency

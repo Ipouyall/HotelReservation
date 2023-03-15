@@ -347,6 +347,23 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         if(j["kind"]=="success")
             print_users_info(udata);
     }
+    else if (command=="3" || command=="3_view_rooms_information" || command=="view_rooms_information")
+    {
+        LOG(INFO) << "Getting rooms information...";
+        add_history(command.c_str());
+        std::string request = decode::get_rooms_info(token);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
+        json j = json::parse(last_response);
+        show_simple_json(j);
+        std::string udata = j["data"];
+        if(j["kind"]=="success")
+            print_rooms_info(udata);
+    }
     else
     {
         std::cerr << "Unknown command: '" << command << "'\n" <<
@@ -385,4 +402,49 @@ void print_users_info(std::string users_data){
         print_user_info(j);
     }
     std::cout<< "---" << std::endl;
+}
+
+void print_room_info(json room_data){
+    std::string valid_rows[] = {
+            "number", "status", "total beds", "available bed", "price(each bed)",
+    };
+    for (auto& key : valid_rows) {
+        if (!room_data.contains(key))
+            continue;
+        print_element(key, 15);
+        print_element(":", 2);
+        print_element(room_data[key], 30);
+        std::cout << std::endl;
+    }
+    if (!room_data.contains("users"))
+        return;
+    std::string valid_user_rows[] = {
+            "id", "beds", "check-in", "check-out"
+    };
+    std::cout << "Users:" << std::endl;
+    for (std::string jj : room_data["users"]) {
+        json j = json::parse(jj);
+        std::cout<< "+-  ";
+        for (auto& key : valid_user_rows) {
+            if (!j.contains(key))
+                continue;
+            if (key != "id")
+                print_element("", 4);
+            print_element(key, 15);
+            print_element(":", 2);
+            print_element(j[key], 30);
+            std::cout << std::endl;
+        }
+    }
+}
+
+void print_rooms_info(std::string rooms_data){
+    std::cout<< "- Rooms information:" << std::endl;
+    auto rd = json::parse(rooms_data);
+    for (std::string jj : rd) {
+        json j = json::parse(jj);
+        std::cout<< "*********************************" << std::endl;
+        print_room_info(j);
+    }
+    std::cout<< "------------------------------" << std::endl;
 }

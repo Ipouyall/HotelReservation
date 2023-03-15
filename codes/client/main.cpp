@@ -84,7 +84,6 @@ int main(int argc, char const *argv[]) {
     FD_ZERO(&master_set);
     FD_SET(sockfd, &master_set);
     FD_SET(STDIN_FILENO, &master_set);
-    cmd.activate_autocompletion();
 
     while (true) {
         cmd.activate_autocompletion();

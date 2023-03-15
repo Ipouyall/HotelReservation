@@ -25,7 +25,7 @@ Server::Server() {
 
 int Server::get_fd() { return fd;}
 
-std::string Server::diagnose(std::string command, UserManager& um, int client_fd) {
+std::string Server::diagnose(std::string command, UserManager& um, HotelManager& hm, int client_fd) {
     LOG(INFO) << "Diagnosing incoming request";
     json json_data_in = json::parse(command);
     // TODO: update arguments of this function
@@ -43,6 +43,8 @@ std::string Server::diagnose(std::string command, UserManager& um, int client_fd
         rsp = view_user_information(json_data_in, um);
     else if(cmd == "view_users_info")
         rsp = view_all_users(json_data_in, um);
+    else if(cmd == "view_rooms_info")
+        rsp = view_rooms_info(json_data_in, um, hm);
     return rsp;
 }
 
@@ -156,6 +158,23 @@ std::string Server::view_all_users(json &j_in, UserManager &um) {
         rsp = response("error", "403", "You don't have required access for this functionality");
     else
         rsp = response("success", "001", "Here is all users in our hotel");
+    rsp["data"] = data;
+    return rsp.dump();
+}
+
+std::string Server::view_rooms_info(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for view all rooms data received";
+    std::string token = j_in["token"];
+    UserRole role = um.get_role(token);
+    if (role == UserRole::NONE)
+        return "";
+    bool admin_access = role == UserRole::ADMIN;
+    std::string data = hm.get_rooms_data(admin_access);
+    json rsp;
+    if (data=="")
+        rsp = response("error", "000", "Operation failed, please try again later!");
+    else
+        rsp = response("success", "001", "Here is our rooms information");
     rsp["data"] = data;
     return rsp.dump();
 }
