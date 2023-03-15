@@ -4,6 +4,7 @@
 #include "filehandler.h"
 #include "user.h"
 #include "hotel.h"
+#include "dateManager.h"
 #include <string>
 
 using json = nlohmann::json;
@@ -22,13 +23,16 @@ serverConfig get_server_config(std::string path);
 class Server{
 private:
     serverConfig config;
+    UserManager um;
+    HotelManager hm;
+    date::year_month_day today_date;
     json errors;
     int fd;
 
 public:
     Server();
     int get_fd();
-    std::string diagnose(std::string command, UserManager& um, HotelManager& hm, int client_fd);
+    std::string diagnose(std::string command, int client_fd);
 
 private:
     json response(std::string kind, std::string status_code, std::string msg);
@@ -39,15 +43,15 @@ private:
     std::string view_user_information(json& j_in, UserManager& um);
     std::string view_all_users(json& j_in, UserManager& um);
     std::string view_rooms_info(json& j_in, UserManager& um, HotelManager& hm);
-    std::string book_a_room(); // TODO: implement dependency
-    std::string cancel_a_room(); // TODO: implement dependency
+    std::string book_a_room(json& j_in, UserManager& um, HotelManager& hm);
+    std::string cancel_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
     std::string pass_days(); // TODO: implement dependency
-    std::string edit_user_info(); // TODO: implement dependency
-    std::string leave_room(); // TODO: implement dependency
-    std::string empty_room(); // TODO: implement dependency
-    std::string add_a_room(); // TODO: implement dependency
-    std::string modify_a_room(); // TODO: implement dependency
-    std::string remove_a_room(); // TODO: implement dependency
+    std::string edit_user_info(json& j_in, UserManager& um); // TODO: implement dependency
+    std::string leave_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string empty_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string add_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string modify_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string remove_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
 };
 
 #endif //SRC_SERVER_H

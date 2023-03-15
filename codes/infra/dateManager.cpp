@@ -21,3 +21,10 @@ std::string dateManager::get_string(date::year_month_day date_){
     << date_.year();
     return out.str();
 }
+
+bool dateManager::valid_format(std::string dateString){
+    std::istringstream in{dateString};
+    date::year_month_day tempDate;
+    in >> date::parse("%d-%m-%Y", tempDate);
+    return in.fail() != true;
+}

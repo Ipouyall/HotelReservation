@@ -26,7 +26,7 @@ bool Command::is_server_still_up() {
 
 char** Command::initial_state_command_completion(const char* text, int start, int end) {
     static std::vector<std::string> commands = {
-            "signin ", "signup", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
+            "signin ", "signup ", "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
     };
     const char* prefix = rl_line_buffer;
     std::vector<std::string> matches;
@@ -96,8 +96,12 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
         add_history(command.c_str());
         std::string password, phone, address;
         int balance;
+        if (stream.eof()) {
+            std::cerr << "Wrong command format!" << std::endl;
+            return;
+        }
         stream >> username;
-        if (username == "signup")
+        if (!stream.eof() || username=="" || username=="signup")
         {
             std::cerr << "Wrong command format!" << std::endl;
             return;
@@ -364,6 +368,42 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         if(j["kind"]=="success")
             print_rooms_info(udata);
     }
+    else if (command=="4" || command=="4_booking" || command=="booking")
+    {
+        LOG(INFO) << "Booking a room...";
+        std::cout <<
+        "Command format: book <room_number> <beds_count> <check_in_date(dd-mm-yyyy)> <check_out_date(dd-mm-yyyy)>" <<
+        std::endl;
+        int beds_count;
+        std::string roomID, check_in, check_out;
+        // use read line to read a line
+        char* line = readline("> ");
+        if (line == nullptr)
+            return;
+        std::string line_str(line), t_cmd;
+        std::istringstream line_stream(line_str);
+        line_stream >> t_cmd;
+        if(line_stream.eof() || t_cmd != "book") return;
+        line_stream >> roomID;
+        if(line_stream.eof()) return;
+        line_stream >> beds_count;
+        if(line_stream.eof()) return;
+        line_stream >> check_in;
+        if(line_stream.eof()) return;
+        line_stream >> check_out;
+        if(!line_stream.eof()) return;
+        add_history(line);
+        free(line);
+        std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
+        bool sent = send_message(server_fd, request);
+        if (!sent)
+            return;
+        is_server_up = receive_data(server_fd,last_response);
+        if (!is_server_up)
+            return;
+        json j = json::parse(last_response);
+        show_simple_json(j);
+    }
     else
     {
         std::cerr << "Unknown command: '" << command << "'\n" <<
@@ -432,7 +472,7 @@ void print_room_info(json room_data){
                 print_element("", 4);
             print_element(key, 15);
             print_element(":", 2);
-            print_element(j[key], 30);
+            print_element((j[key]), 30);
             std::cout << std::endl;
         }
     }

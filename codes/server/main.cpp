@@ -33,7 +33,6 @@ int main(int argc, char *argv[]) {
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
-    LOG(INFO) << "Initializing Server...";
 
     signal(SIGINT, signalHandler);
 
@@ -41,8 +40,6 @@ int main(int argc, char *argv[]) {
     std::string bufferString;
     fd_set master_set, working_set;
     auto server = Server();
-    auto users = UserManager();
-    auto hotel = HotelManager();
 
     server_fd = server.get_fd();
 
@@ -67,12 +64,12 @@ int main(int argc, char *argv[]) {
                     close(i);
                     FD_CLR(i, &master_set);
                     LOG(INFO) << "Client (" << i << ") gone";
-                    users.client_dead(i);
+                    server.diagnose("client_dead", i);
                     continue;
                 }
 
-                LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl;
-                std::string response = server.diagnose(bufferString, users, hotel, i);
+                LOG(INFO) << "New message from (fd=" << i << ") :" << bufferString << std::endl; // TODO: delete this before merge into main
+                std::string response = server.diagnose(bufferString, i);
                 if (send(i, response.c_str(), strlen(response.c_str()), 0) != -1)
                     LOG(INFO) << "Your response sent";
                 else

@@ -54,7 +54,7 @@ std::string decode::get_rooms_info(std::string& token){
     return j.dump();
 }
 
-std::string decode::book_room(std::string& token, int roomID, int n_beds, std::string& check_in, std::string& check_out){
+std::string decode::book_room(std::string& token, std::string roomID, int n_beds, std::string& check_in, std::string& check_out){
     json j;
     j["kind"] = "booking";
     j["token"] = token;

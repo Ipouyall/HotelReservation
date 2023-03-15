@@ -18,20 +18,25 @@ serverConfig get_server_config(std::string path) {
 }
 
 Server::Server() {
+    LOG(INFO) << "Initializing Server...";
     config = get_server_config(DEFAULT_SERVER_PATH);
+    um = UserManager();
+    hm = HotelManager(); // TODO: set current-time before this and use the other constructor
     errors = readJsonFile(DEFAULT_ERRORS_PATH);
     fd = setupServer(config.host_name.c_str(), config.port);
 }
 
 int Server::get_fd() { return fd;}
 
-std::string Server::diagnose(std::string command, UserManager& um, HotelManager& hm, int client_fd) {
+std::string Server::diagnose(std::string command, int client_fd) {
     LOG(INFO) << "Diagnosing incoming request";
     json json_data_in = json::parse(command);
     // TODO: update arguments of this function
     std::string cmd = json_data_in["kind"];
-    std:: string rsp;
-    if(cmd == "sign_in")
+    std:: string rsp="";
+    if(cmd == "client_dead")
+        um.client_dead(client_fd);
+    else if(cmd == "sign_in")
         rsp = sign_in(json_data_in, um, client_fd);
     else if(cmd == "free_username")
         rsp = is_uname_available(json_data_in, um);
@@ -45,6 +50,8 @@ std::string Server::diagnose(std::string command, UserManager& um, HotelManager&
         rsp = view_all_users(json_data_in, um);
     else if(cmd == "view_rooms_info")
         rsp = view_rooms_info(json_data_in, um, hm);
+    else if(cmd == "booking")
+        rsp = book_a_room(json_data_in, um, hm);
     return rsp;
 }
 
@@ -167,7 +174,7 @@ std::string Server::view_rooms_info(json &j_in, UserManager &um, HotelManager &h
     std::string token = j_in["token"];
     UserRole role = um.get_role(token);
     if (role == UserRole::NONE)
-        return "";
+        return response("error", "403", "You don't have required access for this functionality");
     bool admin_access = role == UserRole::ADMIN;
     std::string data = hm.get_rooms_data(admin_access);
     json rsp;
@@ -178,3 +185,36 @@ std::string Server::view_rooms_info(json &j_in, UserManager &um, HotelManager &h
     rsp["data"] = data;
     return rsp.dump();
 }
+
+std::string Server::book_a_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for booking a room received";
+    std::string token = j_in["token"];
+    UserRole role = um.get_role(token);
+    if (role != UserRole::USER)
+        return response("error", "403", "Only users can book a room").dump();
+    std::string room_id = j_in["roomID"], check_in = j_in["check_in"], check_out = j_in["check_out"];
+    int bed_count = j_in["beds_count"], user_id = um.get_id(token);
+
+    if (!dateManager::valid_format(check_in) || !dateManager::valid_format(check_out))
+        return response("error", "503", "User <dd-mm-yyyy> formatted date").dump();
+
+    auto check_in_date = dateManager::convert(check_in);
+    auto check_out_date = dateManager::convert(check_out);
+
+    if (!hm.room_num_exist(room_id))
+        return response("error", "101", "Room number doesn't exist").dump();
+    if(hm.check_user_reserved(room_id, user_id))
+        return response("error", "503", "You should cancel your previous reservation").dump();
+    if (!um.have_enough_money(token, hm.get_total_price(room_id, bed_count, check_in_date, check_out_date)))
+        return response("error", "108", "You don't have enough money to book this room").dump();
+    if (!hm.booking_date_validation(today_date, check_in_date, check_out_date))
+        return response("error", "503", "Error in entered dates").dump();
+    if (!hm.check_room_available(check_in_date, check_out_date, room_id, bed_count))
+        return response("error", "109", "Room doesn't meet your request").dump();
+    auto cost = hm.get_total_price(room_id, bed_count, check_in_date, check_out_date);
+    hm.book(today_date, room_id, user_id, bed_count, check_in_date, check_out_date);
+    um.reduce_balance(token,cost);
+    return response("success", "110", "Room reserved successfully").dump();
+}
+
+

@@ -18,7 +18,7 @@ namespace decode {
 
     std::string get_rooms_info(std::string& token);
 
-    std::string book_room(std::string& token, int roomID, int n_beds, std::string& check_in, std::string& check_out);
+    std::string book_room(std::string& token, std::string roomID, int n_beds, std::string& check_in, std::string& check_out);
 
     std::string get_reservations(std::string& token);
     std::string cancel_booking(std::string& token, int roomID, int n_beds);
