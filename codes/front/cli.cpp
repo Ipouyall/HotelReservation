@@ -73,7 +73,7 @@ void Command::execute_initial_state_command(const std::string& cmd, int server_f
 
     if (command == "help") {
         std::cout << help_prompt << std::endl;
-        // add_history(command.c_str());
+        add_history(command.c_str());
     }
     else if (command == "quit" || command == "exit")
         exit(0);
@@ -100,7 +100,7 @@ void Command::signup(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Signup menu...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string password, phone, address;
     int balance;
     if (stream.eof()) {
@@ -153,7 +153,7 @@ void Command::login(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Signin menu...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     stream >> username;
     if (username == "signin")
     {
@@ -181,7 +181,7 @@ void Command::login(std::string cmd, int server_fd) {
     save_client_log(dateManager::convert(j["time"]), "client/", true, username, j["status_code"], 
                         j["status"], j["message"], "login");
     privilege_access = j["privilege"];
-    // clear_history();
+    clear_history();
 }
 
 void Command::recover_state(int server_fd) {
@@ -212,7 +212,7 @@ void Command::activate_autocompletion() {
     if (logged_in)
     {
         LOG(INFO) << "Reservation menu is activating...";
-        // rl_attempted_completion_function = (CPPFunction *) reservation_command_completion;
+        rl_attempted_completion_function = (CPPFunction *) reservation_command_completion;
         std::string prompt = "Welcome " + username + "!\nHow can I help you?\n";
         prompt += "1. View user information\n";
         prompt += "2. View all users\n";
@@ -229,7 +229,7 @@ void Command::activate_autocompletion() {
     }
     else {
         LOG(INFO) << "Initial menu is activating...";
-        // rl_attempted_completion_function = (CPPFunction *) initial_state_command_completion;
+        rl_attempted_completion_function = (CPPFunction *) initial_state_command_completion;
     }
 }
 
@@ -365,7 +365,7 @@ void Command::logout(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Logging out...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string request = decode::logout(token);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -387,7 +387,7 @@ void Command::view_user_info(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Getting user data...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string request = decode::get_user_info(token);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -413,7 +413,7 @@ void Command::view_users(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Getting all users data...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string request = decode::get_users(token);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -445,7 +445,7 @@ void Command::view_rooms(std::string cmd, int server_fd) {
         else if (opt!="--all" && opt!="--total")
             std::cout << "Unknown option (" << opt <<"), getting all rooms info" << std::endl;
     }
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string request = decode::get_rooms_info(token);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -521,7 +521,7 @@ void Command::book_room(std::string cmd, int server_fd) {
         std::cout << "Too many argument!" << std::endl;
         return;
     }
-    // add_history(line_str.c_str());
+    add_history(line_str.c_str());
     std::string request = decode::book_room(token, roomID, beds_count, check_in, check_out);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -614,7 +614,7 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Canceling a reservation/ requesting to view reservations...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::string request = decode::get_reservations(token);
     bool sent = send_message(server_fd, request);
     if (!sent)
@@ -645,7 +645,7 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
     if(line_stream.eof()) return;
     line_stream >> beds_count;
     if(!line_stream.eof()) return;
-    // add_history(line_str.c_str());
+    add_history(line_str.c_str());
 
     request = decode::cancel_booking(token, roomID, beds_count);
     sent = send_message(server_fd, request);
@@ -698,7 +698,7 @@ void Command::pass_day(std::string cmd, int server_fd) {
     std::string command;
     stream >> command;
     LOG(INFO) << "Updating system's date...";
-    // add_history(command.c_str());
+    add_history(command.c_str());
     std::cout << "- command format: passDay <number of days>" << std::endl;
     int days;
     char* line = readline("> ");
@@ -716,7 +716,7 @@ void Command::pass_day(std::string cmd, int server_fd) {
         std::cout << "Invalid command: Too many arguments!" << std::endl;
         return;
     }
-    // add_history(line_str.c_str());
+    add_history(line_str.c_str());
     std::string request = decode::passing_time(token, days);
     bool sent = send_message(server_fd, request);
     if (!sent)
