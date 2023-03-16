@@ -132,7 +132,10 @@ std::string Server::is_uname_available(json &j_in, UserManager &um) {
     {
         rsp = response("error", "451", "Username exists, try another one.");
         LOG(WARNING) << "Username is available";
+        
     }
+    save_server_log(today_date, "server/", rsp["kind"]=="success", "", fd,
+                         rsp["status_code"], rsp["status"], rsp["message"], "signup");
     return rsp.dump();
 }
 
@@ -267,7 +270,7 @@ std::string Server::book_a_room(json &j_in, UserManager &um, HotelManager &hm) {
         return rsp.dump();
     }
     if (!um.have_enough_money(token, hm.get_total_price(room_id, bed_count, check_in_date, check_out_date))){
-        rsp =response("error", "108", "You don't have enough money to book this room");
+        rsp = response("error", "108", "You don't have enough money to book this room");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Booking"); 
         return rsp.dump();
@@ -287,7 +290,7 @@ std::string Server::book_a_room(json &j_in, UserManager &um, HotelManager &hm) {
     auto cost = hm.get_total_price(room_id, bed_count, check_in_date, check_out_date);
     hm.book(today_date, room_id, user_id, bed_count, check_in_date, check_out_date);
     um.reduce_balance(token,cost);
-    json rsp = response("success", "110", "Room reserved successfully");
+    rsp = response("success", "110", "Room reserved successfully");
     save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Booking"); 
     return rsp.dump();
@@ -320,8 +323,9 @@ std::string Server::cancel_a_room(json &j_in, UserManager &um, HotelManager &hm)
     LOG(INFO) << "New request for canceling a room received";
     std::string token = j_in["token"];
     UserRole role = um.get_role(token);
+    json rsp;
     if (role != UserRole::USER){
-        json rsp = response("error", "403", "Only users can cancel a reservation");
+        rsp = response("error", "403", "Only users can cancel a reservation");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Cancelling"); 
         return rsp.dump();
@@ -329,7 +333,6 @@ std::string Server::cancel_a_room(json &j_in, UserManager &um, HotelManager &hm)
     std::string room_id = j_in["roomID"];
     int beds_count = j_in["beds_count"], user_id = um.get_id(token);
 
-    json rsp;
     if (!hm.room_num_exist(room_id)){
         rsp = response("error", "101", "Room number doesn't exist");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
@@ -414,39 +417,79 @@ std::string Server::leave_room(json &j_in, UserManager &um, HotelManager &hm) {
         return response("error", "403", "Only users can leave a room!").dump();
     int user_id = um.get_id(token);
     std::string roomID = j_in["roomID"];
-    if(!hm.room_num_exist(roomID))
-        return response("error", "503", "That wasn't a valid room").dump();
-    if(!hm.is_user_in_room(today_date, roomID, user_id))
-        return response("error", "102", "You are not in this room (at least, yet)").dump();
+    json rsp;
+    if(!hm.room_num_exist(roomID)){
+        rsp = response("error", "503", "That wasn't a valid room");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|leaving"); 
+        return rsp.dump();
+    }
+    if(!hm.is_user_in_room(today_date, roomID, user_id)){
+        rsp = response("error", "102", "You are not in this room (at least, yet)");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|leaving"); 
+        return rsp.dump();
+    }
     hm.left_user_room(roomID, user_id);
-    return response("success", "413", "Hope you enjoyed our hotel, bye").dump();
+    rsp = response("success", "413", "Hope you enjoyed our hotel, bye");
+    save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|leaving");
+    return rsp.dump();
 }
 
 std::string Server::empty_room(json &j_in, UserManager &um, HotelManager &hm) {
     LOG(INFO) << "New request for emptying a room received";
     std::string token = j_in["token"];
-    if(um.get_role(token) != UserRole::ADMIN)
-        return response("error", "403", "Only admins can manage a room!").dump();
+    json rsp;
+    if(um.get_role(token) != UserRole::ADMIN){
+        rsp = response("error", "403", "Only admins can manage a room!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|making empty");
+        return rsp.dump();
+    }
     std::string roomID = j_in["roomID"];
-    if(!hm.room_num_exist(roomID))
+    if(!hm.room_num_exist(roomID)){
+        rsp = response("error", "101", "That isn't a valid room");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|making empty");
         return response("error", "101", "That isn't a valid room").dump();
+    }
     hm.make_room_empty(today_date, roomID);
-    return response("success", "413", "All users has kicked out").dump();
+    rsp = response("success", "413", "All users has kicked out");
+    save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|making empty");
+    return rsp.dump();
 }
 
 std::string Server::add_a_room(json &j_in, UserManager &um, HotelManager &hm) {
     LOG(INFO) << "New request for adding a room received";
     std::string token = j_in["token"];
-    if(um.get_role(token) != UserRole::ADMIN)
-        return response("error", "403", "Only admins can manage a room!").dump();
+    json rsp;
+    if(um.get_role(token) != UserRole::ADMIN){
+        rsp = response("error", "403", "Only admins can manage a room!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|add");
+        return rsp.dump();
+    }
     std::string roomID = j_in["roomID"];
     int max_cap = j_in["max_cap"];
     int price = j_in["price"];
-    if(hm.room_num_exist(roomID))
-        return response("error", "111", "This room already exists").dump();
-    if(!hm.add_room(roomID, max_cap, price))
-        return response("error", "111", "Couldn't add room").dump();
-    return response("success", "104", "Room (" + roomID + ") added successfully").dump();
+    if(hm.room_num_exist(roomID)){
+        rsp = response("error", "111", "This room already exists");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|add");
+        return rsp.dump();
+    }
+    if(!hm.add_room(roomID, max_cap, price)){
+        rsp = response("error", "111", "Couldn't add room");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|add");
+        return rsp.dump();
+    }
+    rsp = response("success", "104", "Room (" + roomID + ") added successfully");
+    save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|add");
+    return rsp.dump();
 }
 
 std::string Server::modify_a_room(json &j_in, UserManager &um, HotelManager &hm) {
@@ -457,26 +500,58 @@ std::string Server::modify_a_room(json &j_in, UserManager &um, HotelManager &hm)
     std::string roomID = j_in["roomID"];
     int max_cap = j_in["max_cap"];
     int price = j_in["price"];
-    if(!hm.room_num_exist(roomID))
-        return response("error", "101", "This isn't a valid room!").dump();
-    if(!hm.modify_validation(roomID, max_cap))
-        return response("error", "109", "Room should be empty for modification!").dump();
-    if(!hm.modify_room(roomID, max_cap, price))
-        return response("error", "000", "Couldn't modify room!!!").dump();
-    return response("success", "105", "Room (" + roomID + ") modified successfully").dump();
+    json rsp;
+    if(!hm.room_num_exist(roomID)){
+        rsp = response("error", "101", "This isn't a valid room!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
+        return rsp.dump();
+    }
+    if(!hm.modify_validation(roomID, max_cap)){
+        rsp = response("error", "109", "Room should be empty for modification!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
+        return rsp.dump();
+    }
+    if(!hm.modify_room(roomID, max_cap, price)){
+        rsp = response("error", "000", "Couldn't modify room!!!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
+        return rsp.dump();
+    }
+    rsp = response("success", "105", "Room (" + roomID + ") modified successfully");
+    save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
+    return rsp.dump();
 }
 
 std::string Server::remove_a_room(json &j_in, UserManager &um, HotelManager &hm) {
     LOG(INFO) << "New request for removing a room received";
     std::string token = j_in["token"];
-    if (um.get_role(token) != UserRole::ADMIN)
-        return response("error", "403", "Only admins can manage a room!").dump();
+    json rsp;
+    if (um.get_role(token) != UserRole::ADMIN){
+        rsp = response("error", "403", "Only admins can manage a room!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
+        return rsp.dump();
+    }
     std::string roomID = j_in["roomID"];
-    if (!hm.room_num_exist(roomID))
-        return response("error", "101", "This isn't a valid room").dump();
-    if (!hm.room_is_empty(roomID))
+    if (!hm.room_num_exist(roomID)){
+        rsp = response("error", "101", "This isn't a valid room");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
+        return rsp.dump();
+    }
+    if (!hm.room_is_empty(roomID)){
+        rsp = response("error", "109", "Room should be empty for removing!");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
         return response("error", "109", "Room should be empty for removing!").dump();
+    }
     hm.remove_room(roomID);
+    rsp = response("success", "106", "Room (" + roomID + ") removed successfully");
+    save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                         rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
     return response("success", "106", "Room (" + roomID + ") removed successfully").dump();
 }
 
