@@ -32,6 +32,7 @@ private:
     void execute_reservation_command(const std::string& cmd, int server_fd);
     void execute_initial_state_command(const std::string& cmd, int server_fd);
 
+    void help();
     void logout(std::string command, int server_fd);
     void login(std::string command, int server_fd);
     void signup(std::string command, int server_fd);
@@ -50,8 +51,8 @@ private:
 void show_simple_json(json j);
 void print_user_info(json user_data);
 void print_users_info(std::string users_data);
-void print_room_info(json room_data);
-void print_rooms_info(std::string rooms_data);
+void print_room_info(json room_data, bool filter_available, bool filter_empty);
+void print_rooms_info(std::string rooms_data, bool filter_available, bool filter_empty);
 void print_reservations(std::string reservations_data);
 
 #endif //CODES_CLI_H

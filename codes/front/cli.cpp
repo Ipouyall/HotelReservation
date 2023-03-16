@@ -240,7 +240,6 @@ char** Command::reservation_command_completion(const char* text, int start, int 
             "8_leaving_room", "leaving_room",
             "9_rooms", "rooms",
             "0_logout", "logout",
-            "signup",
             "exit", "quit", "help", "verbose+", "verbose++", "verbose-", "clear"
     };
     const char* prefix = rl_line_buffer;
@@ -267,15 +266,47 @@ char** Command::reservation_command_completion(const char* text, int start, int 
     }
 }
 
+void Command::help() {
+    std::string prompt = "*-----Help menu-----*\n";
+    prompt += "- view user information\n";
+    prompt += "::To see your personal profile\n\n";
+    prompt += "- view all users\n";
+    prompt += "::To see a summary of hotel users(privilege)\n\n";
+    prompt += "- view rooms information\n";
+    prompt += "::To see a summary of hotel rooms\n";
+    prompt += "::::  You can use [--available|-a] to only see available rooms\n";
+    prompt += "::::              [--empty|-e] to see empty rooms\n";
+    prompt += "::::              [--total|--all|] to see all rooms\n\n";
+    prompt += "- booking\n";
+    prompt += "::To book a room\n\n";
+    prompt += "- cancelling\n";
+    prompt += "::To cancel a reservation\n\n";
+    prompt += "- pass day\n";
+    prompt += "::Used for modifying system time(privilege)\n\n";
+    prompt += "- edit information\n";
+    prompt += "::To edit your personal information\n\n";
+    prompt += "- leaving room\n";
+    prompt += "::To leave a room\n";
+    prompt += "::To empty a room(privilege)\n\n";
+    prompt += "- rooms\n";
+    prompt += "::To add/modify/move a hotel's room\n\n";
+    prompt += "- logout\n\n";
+    prompt += "- exit/quit\n";
+    prompt += "::To close this client\n\n";
+    prompt += "- verbose+/verbose++/verbose-\n";
+    prompt += "::Modifying log level\n\n";
+    prompt += "- clear\n";
+    prompt += "::To clear the screen";
+    std::cout << prompt << std::endl;
+}
+
 void Command::execute_reservation_command(const std::string& cmd, int server_fd) {
     std::istringstream stream(cmd);
     std::string command;
     stream >> command;
 
     if (command == "help")
-    {
-        std::cout << "Implement help prompt" << std::endl;
-    }
+        help();
     else if (command == "quit" || command == "exit")
         exit(0);
     else if (command == "verbose+")
@@ -379,9 +410,19 @@ void Command::view_users(std::string cmd, int server_fd) {
 
 void Command::view_rooms(std::string cmd, int server_fd) {
     std::istringstream stream(cmd);
-    std::string command;
+    std::string command, opt;
+    bool available_f=false, empty_f=false;
     stream >> command;
     LOG(INFO) << "Getting rooms information...";
+    if(!stream.eof()){
+        stream >> opt;
+        if(opt=="--available" || opt=="-a")
+            available_f=true;
+        else if(opt=="--empty" || opt=="-e")
+            empty_f=true;
+        else if (opt!="--all" && opt!="--total")
+            std::cout << "Unknown option (" << opt <<"), getting all rooms info" << std::endl;
+    }
     add_history(command.c_str());
     std::string request = decode::get_rooms_info(token);
     bool sent = send_message(server_fd, request);
@@ -394,7 +435,7 @@ void Command::view_rooms(std::string cmd, int server_fd) {
     show_simple_json(j);
     std::string udata = j["data"];
     if(j["kind"]=="success")
-        print_rooms_info(udata);
+        print_rooms_info(udata, available_f, empty_f);
 }
 
 void Command::book_room(std::string cmd, int server_fd) {
@@ -499,10 +540,16 @@ void print_users_info(std::string users_data){
     std::cout<< "*-------------||-------------*" << std::endl;
 }
 
-void print_room_info(json room_data){
+void print_room_info(json room_data, bool filter_available, bool filter_empty){
     std::string valid_rows[] = {
             "number", "status", "total beds", "available bed", "price(each bed)",
     };
+    int avl_beds = room_data["available bed"], used_bed = room_data["total beds"];
+    used_bed -= avl_beds;
+    bool prune = (!room_data.contains("users")) &&
+            ((filter_available && avl_beds==0) || (filter_empty && used_bed!=0));
+    if(prune)
+        return;
     for (auto& key : valid_rows) {
         if (!room_data.contains(key))
             continue;
@@ -511,8 +558,10 @@ void print_room_info(json room_data){
         print_element(room_data[key], 30);
         std::cout << std::endl;
     }
-    if (!room_data.contains("users"))
+    if (!room_data.contains("users")) {
+        std::cout << std::endl;
         return;
+    }
     std::string valid_user_rows[] = {
             "id", "beds", "check-in", "check-out"
     };
@@ -531,6 +580,7 @@ void print_room_info(json room_data){
             std::cout << std::endl;
         }
     }
+    std::cout << std::endl;
 }
 
 void Command::cancel_reservation(std::string cmd, int server_fd) {
@@ -580,13 +630,12 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
     show_simple_json(j);
 }
 
-void print_rooms_info(std::string rooms_data){
+void print_rooms_info(std::string rooms_data, bool filter_available, bool filter_empty){
     std::cout<< "*-----Rooms information-----*" << std::endl;
     auto rd = json::parse(rooms_data);
     for (std::string jj : rd) {
         json j = json::parse(jj);
-        std::cout<< "*++++++++++*" << std::endl;
-        print_room_info(j);
+        print_room_info(j, filter_available, filter_empty);
     }
     std::cout<< "*-------------||------------*" << std::endl;
 }
