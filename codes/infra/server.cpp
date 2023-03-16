@@ -102,6 +102,7 @@ std::string Server::sign_in(json& j_in, UserManager& um, int fd){
                 "success", "230", "You logged in successfully."
         );
         rsp["token"] = token;
+        rsp["privilege"] = um.get_role(token) == UserRole::ADMIN;
         LOG(INFO) << "Login request from (" << fd << ") succeeded.";
     }
     return rsp.dump();

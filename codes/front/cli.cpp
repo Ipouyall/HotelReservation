@@ -19,6 +19,7 @@ Command::Command() {
     last_response="";
     is_server_up=true;
     logged_in=false;
+    privilege_access=false;
 }
 
 bool Command::is_server_still_up() {
@@ -163,11 +164,12 @@ void Command::login(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
-    if (j["kind"]=="error"){
+    if (j["kind"]!="success"){
         return;
     }
     token = j["token"];
     logged_in=true;
+    privilege_access = j["privilege"];
     clear_history();
 }
 
@@ -776,10 +778,13 @@ void Command::edit_information(std::string command, int server_fd) {
 void Command::leave_room(std::string command, int server_fd) {
     LOG(INFO) << "Leaving menu...";
     std::cout << "You can use one of the following commands:" << std::endl;
-    std::cout << "- command: room <room number>" << std::endl;
-    std::cout << ":::::::::: to leave a room" << std::endl;
-    std::cout << "- command: clear <room number>" << std::endl;
-    std::cout << ":::::::::: to kick-out all users of a room" << std::endl;
+    if (privilege_access) {
+        std::cout << "- command: clear <room number>" << std::endl;
+        std::cout << ":::::::::: to kick-out all users of a room" << std::endl;
+    } else {
+        std::cout << "- command: room <room number>" << std::endl;
+        std::cout << ":::::::::: to leave a room" << std::endl;
+    }
 
     char* line = readline("> ");
     if (line == nullptr)
@@ -792,7 +797,7 @@ void Command::leave_room(std::string command, int server_fd) {
         std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
         return;
     }
-    if(t_cmd != "room" && t_cmd != "clear"){
+    if(!((t_cmd == "room" && (!privilege_access)) || (t_cmd == "clear" && privilege_access))){
         std::cout << "Invalid command: " << t_cmd << std::endl;
         return;
     }

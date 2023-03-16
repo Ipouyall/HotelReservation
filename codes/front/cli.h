@@ -16,6 +16,7 @@ private:
     std::string last_response;
     bool logged_in;
     bool is_server_up;
+    bool privilege_access;
 
 public:
     Command();

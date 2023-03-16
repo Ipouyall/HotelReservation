@@ -50,7 +50,7 @@ private:
     std::string edit_user_info(json& j_in, UserManager& um);
     std::string view_room_info(json& j_in, UserManager& um, HotelManager& hm); // TODO: Optional
     std::string leave_room(json& j_in, UserManager& um, HotelManager& hm);
-    std::string empty_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string empty_room(json& j_in, UserManager& um, HotelManager& hm);
     std::string add_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
     std::string modify_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
     std::string remove_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
