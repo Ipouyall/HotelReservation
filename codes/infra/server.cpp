@@ -452,7 +452,7 @@ std::string Server::empty_room(json &j_in, UserManager &um, HotelManager &hm) {
         rsp = response("error", "101", "That isn't a valid room");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Leaving room|making empty");
-        return response("error", "101", "That isn't a valid room").dump();
+        return rsp.dump();
     }
     hm.make_room_empty(today_date, roomID);
     rsp = response("success", "413", "All users has kicked out");
@@ -546,13 +546,13 @@ std::string Server::remove_a_room(json &j_in, UserManager &um, HotelManager &hm)
         rsp = response("error", "109", "Room should be empty for removing!");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
-        return response("error", "109", "Room should be empty for removing!").dump();
+        return rsp.dump();
     }
     hm.remove_room(roomID);
     rsp = response("success", "106", "Room (" + roomID + ") removed successfully");
     save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
                          rsp["status_code"], rsp["status"], rsp["message"], "Rooms|remove");
-    return response("success", "106", "Room (" + roomID + ") removed successfully").dump();
+    return rsp.dump();
 }
 
 void Server::rewrite_data() {

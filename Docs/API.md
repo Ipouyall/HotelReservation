@@ -29,6 +29,7 @@ On success, server would response like:
     "status": "User logged in.",
     "message": "You logged in successfully",
     "token": "<auth-token>",
+    "privilege": "true/flase",
     "time": "<dd-mm-yyyy>"
 }
 ```
@@ -576,9 +577,90 @@ Used when user want to leave room.
 
 ### Leave-room/server
 On success:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+```json
+{
+    "kind": "success",
+    "status_code": "413",
+    "status": "successfully Leaving.",
+    "message": "Hope you enjoyed our hotel, bye",
+    "time": "<dd-mm-yyyy>",
+}
+```
 On failure:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only users can leave a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "503",
+    "status": "Bad sequence of commands.",
+    "message": "Only users can leave a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "102",
+    "status": "Your reservation was not found",
+    "message": "You are not in this room (at least, yet)",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## 
+Used Empty-roomwhen user want to make room empty.
+This is only available for ***super-user***s or ***admin***s.
+### Empty-room/client
+```json
+{
+    "kind": "emptying",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>",
+}
+```
+
+### Empty-room/server
+On success:
+
+```json
+{
+    "kind": "success",
+    "status_code": "413",
+    "status": "successfully Leaving.",
+    "message": "All users has kicked out",
+    "time": "<dd-mm-yyyy>",
+}
+```
+On failure:
+
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only admins can manage a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+```json
+{
+    "kind": "error",
+    "status_code": "101",
+    "status": "The desired room was not found",
+    "message": "That isn't a valid room",
+    "time": "<dd-mm-yyyy>",
+}
+```
 
 ## Modify-room
 Used for changing the room attributes.
@@ -597,10 +679,55 @@ This is only available for ***super-user***s or ***admin***s.
 
 ### Modify-room/server
 On success:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+```json
+{
+    "kind": "success",
+    "status_code": "105",
+    "status": "Successfully modified.",
+    "message": "Room (<room-num>) modified successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
 On failure:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
 
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only admins can manage a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+```json
+{
+    "kind": "error",
+    "status_code": "101",
+    "status": "The desired room was not found",
+    "message": "That isn't a valid room",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "109",
+    "status": "The room capacity is full",
+    "message": "Room should be empty for modification!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "000",
+    "status": "No content.",
+    "message": "Couldn't modify room!!!",
+    "time": "<dd-mm-yyyy>",
+}
+```
 ## Remove-room
 Used for removing the room.
 This is only available for ***super-user***s or ***admin***s.
@@ -616,6 +743,87 @@ This is only available for ***super-user***s or ***admin***s.
 
 ### Remove-room/server
 On success:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+```json
+{
+    "kind": "success",
+    "status_code": "106",
+    "status": "Successfully deleted.",
+    "message": "Room (<room-num>) removed successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
 On failure:
-<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only admins can manage a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+```json
+{
+    "kind": "error",
+    "status_code": "101",
+    "status": "The desired room was not found",
+    "message": "This isn't a valid room",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "109",
+    "status": "The room capacity is full",
+    "message": "Room should be empty for removing!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## Add-room
+Used for adding the room.
+This is only available for ***super-user***s or ***admin***s.
+
+### Add-room/client
+```json
+{
+    "kind": "remove_room",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>"
+}
+```
+
+### Add-room/server
+On success:
+```json
+{
+    "kind": "success",
+    "status_code": "104",
+    "status": "Successfully added.",
+    "message": "Room (<room-num>) added successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
+On failure:
+
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only admins can manage a room!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+```json
+{
+    "kind": "error",
+    "status_code": "111",
+    "status": "This room already exists",
+    "message": "This room already exists",
+    "time": "<dd-mm-yyyy>",
+}
+```

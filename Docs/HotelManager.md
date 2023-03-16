@@ -51,6 +51,7 @@ typedef struct HotelRoom{
     bool left_user(int user_id);
     void make_empty(const date::year_month_day& current_date);
     json get_data_json(bool include_users);
+    bool capacity_validation(int new_capacity);
 } HotelRoom;
 ```
 
@@ -119,6 +120,11 @@ void make_empty(const date::year_month_day& current_date);
 json get_data_json(bool include_users);
 ```
 - Return room information in json format and if `include_users` set to `true`, it adds users reservation's information in json.
+
+```c++
+bool capacity_validation(int new_capacity);
+```
+- Check new capacity with other reservation then `return true` if is ok and less all of them.
 
 ### HotelManager
 This class manage everything about reservation such as booking a room, canceling reservation, leaving room , etc.
@@ -323,3 +329,7 @@ example
 void save(std::string path);
 ```
 - Save state of hotel manger in `RoomsInfo.json`.
+```c++
+bool capacity_validation(std::string room_num, int new_capacity)
+```
+- Check new capacity for room with num = `room_num` with other reservation then `return true` if is ok and less all of them.
