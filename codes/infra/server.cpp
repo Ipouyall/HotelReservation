@@ -69,6 +69,12 @@ std::string Server::diagnose(std::string command, int client_fd) {
         rsp = leave_room(json_data_in, um, hm);
     else if (cmd == "emptying")
         rsp = empty_room(json_data_in, um, hm);
+    else if (cmd == "add_room")
+        rsp = add_a_room(json_data_in, um, hm);
+    else if (cmd == "modify_room")
+        rsp = modify_a_room(json_data_in, um, hm);
+    else if (cmd == "remove_room")
+        rsp = remove_a_room(json_data_in, um, hm);
     return rsp;
 }
 
@@ -327,6 +333,52 @@ std::string Server::empty_room(json &j_in, UserManager &um, HotelManager &hm) {
         return response("error", "101", "That isn't a valid room").dump();
     hm.make_room_empty(today_date, roomID);
     return response("success", "413", "All users has kicked out").dump();
+}
+
+std::string Server::add_a_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for adding a room received";
+    std::string token = j_in["token"];
+    if(um.get_role(token) != UserRole::ADMIN)
+        return response("error", "403", "Only admins can manage a room!").dump();
+    std::string roomID = j_in["roomID"];
+    int max_cap = j_in["max_cap"];
+    int price = j_in["price"];
+    if(hm.room_num_exist(roomID))
+        return response("error", "111", "This room already exists").dump();
+    if(!hm.add_room(roomID, max_cap, price))
+        return response("error", "111", "Couldn't add room").dump();
+    return response("success", "104", "Room (" + roomID + ") added successfully").dump();
+}
+
+std::string Server::modify_a_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for modifying a room received";
+    std::string token = j_in["token"];
+    if(um.get_role(token) != UserRole::ADMIN)
+        return response("error", "403", "Only admins can manage a room!").dump();
+    std::string roomID = j_in["roomID"];
+    int max_cap = j_in["max_cap"];
+    int price = j_in["price"];
+    if(!hm.room_num_exist(roomID))
+        return response("error", "101", "This isn't a valid room!").dump();
+    if(!hm.modify_validation(roomID, max_cap))
+        return response("error", "109", "Room should be empty for modification!").dump();
+    if(!hm.modify_room(roomID, max_cap, price))
+        return response("error", "000", "Couldn't modify room!!!").dump();
+    return response("success", "105", "Room (" + roomID + ") modified successfully").dump();
+}
+
+std::string Server::remove_a_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for removing a room received";
+    std::string token = j_in["token"];
+    if (um.get_role(token) != UserRole::ADMIN)
+        return response("error", "403", "Only admins can manage a room!").dump();
+    std::string roomID = j_in["roomID"];
+    if (!hm.room_num_exist(roomID))
+        return response("error", "101", "This isn't a valid room").dump();
+    if (!hm.room_is_empty(roomID))
+        return response("error", "109", "Room should be empty for removing!").dump();
+    hm.remove_room(roomID);
+    return response("success", "106", "Room (" + roomID + ") removed successfully").dump();
 }
 
 void Server::rewrite_data() {

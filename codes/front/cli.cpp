@@ -337,8 +337,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         edit_information(cmd, server_fd);
     else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
         leave_room(cmd, server_fd);
-//    else if (command=="9" || command=="9_rooms" || command=="rooms")
-//        hotel_management(cmd, server_fd);
+    else if (command=="9" || command=="9_rooms" || command=="rooms")
+        hotel_management(cmd, server_fd);
     else
         std::cerr << "Unknown command: '" << command << "'\n" <<
                      "::use <help> command to learn about commands" << std::endl;
@@ -779,7 +779,7 @@ void Command::leave_room(std::string command, int server_fd) {
     LOG(INFO) << "Leaving menu...";
     std::cout << "You can use one of the following commands:" << std::endl;
     if (privilege_access) {
-        std::cout << "- command: clear <room number>" << std::endl;
+        std::cout << "- command: room <room number>" << std::endl;
         std::cout << ":::::::::: to kick-out all users of a room" << std::endl;
     } else {
         std::cout << "- command: room <room number>" << std::endl;
@@ -797,7 +797,7 @@ void Command::leave_room(std::string command, int server_fd) {
         std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
         return;
     }
-    if(!((t_cmd == "room" && (!privilege_access)) || (t_cmd == "clear" && privilege_access))){
+    if(t_cmd != "room"){
         std::cout << "Invalid command: " << t_cmd << std::endl;
         return;
     }
@@ -811,11 +811,110 @@ void Command::leave_room(std::string command, int server_fd) {
         return;
     }
     std::string request;
-    if(t_cmd == "room")
+    if(privilege_access)
         request = decode::leave_room(token, roomID);
     else
         request = decode::empty_room(token, roomID);
 
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
+    show_simple_json(j);
+}
+
+void Command::hotel_management(std::string command, int server_fd) {
+    if(!privilege_access) {
+        std::cout << "You don't have access to this command(403)!" << std::endl;
+        return;
+    }
+    LOG(INFO) << "Hotel management menu...";
+    std::cout << "You can use one of the following commands:" << std::endl;
+    std::cout << "- command: add <room number> <maximum capacity> <price per capacity>" << std::endl;
+    std::cout << "::To add a new room with provided information" << std::endl;
+    std::cout << "- command: modify <room number> <new max capacity> <new price>" << std::endl;
+    std::cout << "::To modify an exiting room, this won't effect current reservation(s)" << std::endl;
+    std::cout << "- command: remove <room number>" << std::endl;
+    std::cout << "::To remove an exiting, empty room" << std::endl;
+
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd, tt, roomID="";
+    int maxCap=-1, price=-1;
+    std::istringstream line_stream(line_str);
+    free(line);
+    line_stream >> t_cmd;
+    if(line_stream.eof()) {
+        std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
+        return;
+    }
+    if(!((t_cmd == "add") || (t_cmd == "modify") || (t_cmd == "remove"))){
+        std::cout << "Invalid command: " << t_cmd << std::endl;
+        return;
+    }
+    line_stream >> roomID;
+    if(roomID == "") {
+        std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
+        return;
+    }
+    if(t_cmd == "add") {
+        if(line_stream.eof()) {
+            std::cout << "Invalid command: You have to provide maximum capacity" << std::endl;
+            return;
+        }
+        line_stream >> maxCap;
+        if(line_stream.eof()) {
+            std::cout << "Invalid command: You have to provide price" << std::endl;
+            return;
+        }
+        line_stream >> price;
+        if(line_stream.eof()) {
+            line_stream >> tt;
+            if(tt != "") {
+                std::cout << "Invalid command: Too many argument" << std::endl;
+                return;
+            }
+        }
+    }
+    if(t_cmd == "modify") {
+        if(line_stream.eof()) {
+            std::cout << "Invalid command: You have to provide maximum capacity" << std::endl;
+            return;
+        }
+        line_stream >> maxCap;
+        if(line_stream.eof()) {
+            std::cout << "Invalid command: You have to provide price" << std::endl;
+            return;
+        }
+        line_stream >> price;
+        if(line_stream.eof()) {
+            line_stream >> tt;
+            if(tt != "") {
+                std::cout << "Invalid command: Too many argument" << std::endl;
+                return;
+            }
+        }
+    }
+    if(t_cmd == "remove") {
+        if(!line_stream.eof()) {
+            line_stream >> tt;
+            if(tt != "") {
+                std::cout << "Invalid command: Too many argument" << std::endl;
+                return;
+            }
+        }
+    }
+    std::string request;
+    if(t_cmd == "add")
+        request = decode::add_room(token, roomID, maxCap, price);
+    else if(t_cmd == "modify")
+        request = decode::modify_room(token, roomID, maxCap, price);
+    else
+        request = decode::remove_room(token, roomID);
     bool sent = send_message(server_fd, request);
     if (!sent)
         return;
