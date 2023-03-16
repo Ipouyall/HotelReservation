@@ -30,7 +30,7 @@ Server::Server() {
 int Server::get_fd() { return fd;}
 
 std::string Server::diagnose(std::string command, int client_fd) {
-    LOG(INFO) << "Diagnosing incoming request:" << command;
+    LOG(INFO) << "Diagnosing incoming request...";
     if(command == "client_dead") {
         um.client_dead(client_fd);
         return "";
