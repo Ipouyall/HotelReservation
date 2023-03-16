@@ -17,15 +17,13 @@
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
 
-
 void signalHandler(int signum) {
-    LOG(WARNING) << "Received signal " << signum << ", terminating the program...";
+    LOG(WARNING) << "Program terminated unsafely, user 'exit' command to save server state!!!";
     google::ShutdownGoogleLogging();
-    exit(signum);
+    exit(1);
 }
 
 // TODO: sever should save tokens and restore them when coming up
-// TODO: server need to get set-time command from terminal
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
     google::InstallFailureSignalHandler();
@@ -34,17 +32,18 @@ int main(int argc, char *argv[]) {
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
 
-    signal(SIGINT, signalHandler);
-
     int server_fd, new_socket, max_sd;
     std::string bufferString;
     fd_set master_set, working_set;
     auto server = Server();
 
+    signal(SIGINT, signalHandler);
+
     server_fd = server.get_fd();
 
     FD_ZERO(&master_set);
     FD_SET(server_fd, &master_set);
+    FD_SET(STDIN_FILENO, &master_set);
     LOG(INFO) << "Server is running...";
 
     while (true) {
@@ -53,6 +52,15 @@ int main(int argc, char *argv[]) {
         for (int i = 0; i < FD_SETSIZE; i++) {
             if (!FD_ISSET(i, &working_set))
                 continue;
+            if (i == STDIN_FILENO){
+                std::string command;
+                std::cin >> command;
+                if (command == "exit"){
+                    server.shout_down(0);
+                    google::ShutdownGoogleLogging();
+                    exit(0);
+                }
+            }
             if (i == server_fd) {
                 new_socket = acceptClient(i);
                 if (new_socket != -1)
