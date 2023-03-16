@@ -170,6 +170,15 @@ json HotelRoom::get_data_json(bool include_users) {
     return j;
 }
 
+bool HotelRoom::capacity_validation(int new_capacity){
+    for(int i = 0;i < users.size();i++){
+        if(new_capacity < users[i].number_of_reservation)
+            return false;
+    }
+    return true;
+}
+
+
 HotelManager::HotelManager(){
     rooms = get_hotel_information(DEFAULT_HOTEL_PATH);
 }
@@ -382,6 +391,7 @@ bool HotelManager::modify_room(std::string room_num, int max_capacity, int price
         return false;
     if(!modify_validation(room_num, max_capacity))
         return false;
+    rooms[index].current_capacity += (max_capacity - rooms[index].max_capacity);
     rooms[index].max_capacity = max_capacity;
     rooms[index].price_per_bed = price_per_bed;
     return true;
@@ -452,3 +462,9 @@ void HotelManager::save(std::string path){
     writeJsonFile(path, content);
 }
 
+bool HotelManager::capacity_validation(std::string room_num, int new_capacity){
+    int index = search_by_room_num(room_num);
+    if(index == -1)
+        return false;
+    return rooms[index].capacity_validation(new_capacity);
+}
