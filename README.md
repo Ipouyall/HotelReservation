@@ -129,6 +129,11 @@ While admins are able to see users reservations for rooms:
 
 ![view rooms admin](Docs/screenshots/view-rooms-admin.png)
 
+Also, non-admin user can specify to see:
+- all rooms
+- available rooms
+- empty rooms
+
 ### Booking
 
 Users can book a room:
@@ -150,7 +155,26 @@ And you would earn ***50%*** of the money back:
 ![balance after cancelling](Docs/screenshots/profile-after-cancel.png)
 
 ### Pass day
+Admin can use this command for time management in system;
 
+### Edit information
+
+Both Admin and non-admin users can edit their information.
+
+### Leaving room
+
+Users would use this command to leave their room,
+while Admins can use this to clear a room from its current users.
+
+### Rooms
+
+Complete privilege commands for admins to manage rooms of their hotel.
+
+They can add/modify/remove a room.
+
+### Logout
+
+To logout from their account in a client.
 
 ### Ending program
 
@@ -160,3 +184,11 @@ And you would earn ***50%*** of the money back:
 - To quit server:
   - You can use `exit` or `quit` command
   - You shouldn't use `Ctrl + C` to quit, it is unsafe and wouldn't save the state of the server
+
+***
+## Reference
+
+For more detail, you can read these docs:
+- [API](Docs/API.md)
+- [User Manager class](Docs/UserManager.md)
+- [Logs](Docs/Logs.md)
