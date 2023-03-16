@@ -28,12 +28,12 @@ namespace decode {
 
     std::string edit_information(std::string& token, std::string new_pass="", std::string phone="", std::string addr="");
 
-    std::string leave_room(std::string& token, int roomID);
-    std::string empty_room(std::string& token, int roomID);
+    std::string leave_room(std::string& token, std::string roomID);
+    std::string empty_room(std::string& token, std::string roomID);
 
-    std::string add_room(std::string& token, int roomID, int max_cap, int price);
-    std::string modify_room(std::string& token, int roomID, int max_cap, int price);
-    std::string remove_room(std::string& token, int roomID);
+    std::string add_room(std::string& token, std::string roomID, int max_cap, int price);
+    std::string modify_room(std::string& token, std::string roomID, int max_cap, int price);
+    std::string remove_room(std::string& token, std::string roomID);
 
     std::string logout(std::string& token);
 } // decode

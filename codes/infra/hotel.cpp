@@ -380,7 +380,8 @@ bool HotelManager::modify_room(std::string room_num, int max_capacity, int price
     int index = search_by_room_num(room_num);
     if(index == -1)
         return false;
-
+    if(!modify_validation(room_num, max_capacity))
+        return false;
     rooms[index].max_capacity = max_capacity;
     rooms[index].price_per_bed = price_per_bed;
     return true;
@@ -408,7 +409,7 @@ bool HotelManager::modify_validation(std::string room_num, int new_max_capacity)
     if(index == -1)
         return false;
 
-    if(rooms[index].current_capacity < rooms[index].max_capacity && 
+    if(rooms[index].current_capacity != rooms[index].max_capacity &&
         new_max_capacity < rooms[index].max_capacity)
         return false;
     return true;
