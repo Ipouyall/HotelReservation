@@ -360,6 +360,8 @@ std::string Server::modify_a_room(json &j_in, UserManager &um, HotelManager &hm)
     int price = j_in["price"];
     if(!hm.room_num_exist(roomID))
         return response("error", "101", "This isn't a valid room!").dump();
+    if(!hm.capacity_validation(roomID, max_cap))
+        return response("error", "401", "Room capacity can't change because of conflict with reservation!").dump();
     if(!hm.modify_validation(roomID, max_cap))
         return response("error", "109", "Room should be empty for modification!").dump();
     if(!hm.modify_room(roomID, max_cap, price))
