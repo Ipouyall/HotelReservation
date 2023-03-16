@@ -24,6 +24,15 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glog)
 include_directories(${glog_SOURCE_DIR}/src)
 
+FetchContent_Declare(
+  date
+  GIT_REPOSITORY https://github.com/HowardHinnant/date.git
+  GIT_TAG v3.0.1
+)
+FetchContent_MakeAvailable(date)
+
+find_library(LIBEDIT_LIBRARY edit)
+
 add_executable(hr_test
         main.cpp
         infra/filehandler.cpp
@@ -31,7 +40,10 @@ add_executable(hr_test
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
+        infra/dateManager.cpp
+        infra/saveLog.cpp
+        infra/client.cpp
+        )
 add_executable(hr_server
         server/main.cpp
         infra/filehandler.cpp
@@ -39,7 +51,10 @@ add_executable(hr_server
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
+        infra/dateManager.cpp
+        infra/saveLog.cpp
+        infra/client.cpp
+        )
 add_executable(hr_client
         client/main.cpp
         infra/filehandler.cpp
@@ -47,7 +62,13 @@ add_executable(hr_client
         infra/server.cpp
         infra/user.cpp
         infra/socketUtils.cpp
-        infra/saveLog.cpp)
-target_link_libraries(hr_test nlohmann_json glog::glog)
-target_link_libraries(hr_server nlohmann_json glog::glog)
-target_link_libraries(hr_client nlohmann_json glog::glog)
+        infra/dateManager.cpp
+        infra/saveLog.cpp
+        infra/client.cpp
+        front/cli.cpp
+        )
+
+target_link_libraries(hr_test nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)
+target_link_libraries(hr_server nlohmann_json glog::glog date)
+target_link_libraries(hr_client nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)
+

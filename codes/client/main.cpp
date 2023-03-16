@@ -14,8 +14,7 @@
 #include <stdlib.h>
 #include "../infra/socketUtils.h"
 #include "../infra/server.h"
-
-#define BUFFER_SIZE 1024
+#include "../front/cli.h"
 
 using namespace std;
 
@@ -39,25 +38,47 @@ int connect_to_server(serverConfig& server_info, int max_attempts=10) {
 }
 
 void signalHandler(int signum) {
-    LOG(WARNING) << "Ending client...";
+    LOG(WARNING) << "Shutting down...";
     google::ShutdownGoogleLogging();
     exit(0);
 }
 
-int main(int argc, char const *argv[]) {
-    google::InitGoogleLogging(argv[0]);
+void setUP_client(char const * name) {
+    google::InitGoogleLogging(name);
     google::InstallFailureSignalHandler();
+    FLAGS_minloglevel=3;
     FLAGS_colorlogtostderr = true;
     FLAGS_log_prefix = true;
     FLAGS_logtostderr = true;
     FLAGS_alsologtostderr = true;
     LOG(INFO) << "Initializing Client...";
     signal(SIGINT, signalHandler);
+}
+
+bool is_data_available(int fd, fd_set& fs) {
+    struct timeval timeout = {0, 0};      // Set the timeout to zero for non-blocking select
+
+    int ret = select(fd + 1, &fs, NULL, NULL, &timeout);
+    if (ret == -1) {
+        std::cerr << "Error: select() failed." << std::endl;
+        return false;
+    } else if (ret == 0) {
+        return false;                     // No data available
+    }
+    return true;                      // Data available
+}
+
+// TODO: change cli sucj that we just use its autocompletion and disabling other features
+int main(int argc, char const *argv[]) {
+    setUP_client(argv[0]);
 
     auto server_info = get_server_config(DEFAULT_SERVER_PATH);
     int sockfd = connect_to_server(server_info);
+    bool is_server_up = true;
+    auto cmd = Command();
 
-    char buffer[BUFFER_SIZE];
+
+    std::string buffer;
 
     fd_set master_set, working_set;
     FD_ZERO(&master_set);
@@ -65,37 +86,44 @@ int main(int argc, char const *argv[]) {
     FD_SET(STDIN_FILENO, &master_set);
 
     while (true) {
+        cmd.activate_autocompletion();
+        if (!is_server_up)
+        { // when server is down
+            FD_CLR(sockfd, &master_set);
+            close(sockfd);
+            LOG(WARNING) << "Server is Down";
+            sockfd = connect_to_server(server_info);
+            FD_SET(sockfd, &master_set);
+            cmd.recover_state(sockfd);
+            is_server_up = true;
+            continue;
+        }
+
         working_set = master_set;
-        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
-
+//        select(FD_SETSIZE, &working_set, NULL, NULL, NULL);
         for (int i = 0; i < FD_SETSIZE; i++) {
-            if (FD_ISSET(i, &working_set)) {
-                if (i == STDIN_FILENO) { // input from stdin
-                    memset(buffer, 0, BUFFER_SIZE);
-                    read(STDIN_FILENO, buffer, BUFFER_SIZE);
-                    buffer[strlen(buffer)-1] = '\0';
-
-                    if(send(sockfd, buffer, strlen(buffer), 0) != -1)
-                        LOG(INFO) << "Your response sent to server.";
-                    else
-                        LOG(ERROR) << "Error on sending your message to the server!";
+            if (!FD_ISSET(i, &working_set))
+                continue;
+            if (i == STDIN_FILENO)
+            { // input from stdin
+                char* input;
+                if((input = readline(">> ")) == nullptr) {
+                    LOG(ERROR) << "Couldn't read user prompt";
+                    continue;
                 }
-                else if (i == sockfd) { // sth from server is reached
-                    memset(buffer, 0, BUFFER_SIZE);
-                    int bytes_received = recv(sockfd , buffer, BUFFER_SIZE, 0);
-                    if (bytes_received == 0) { // recovering server when server is down
-                        close(sockfd);
-                        FD_CLR(sockfd, &master_set);
-                        LOG(WARNING) << "Server is Down";
-                        sockfd = connect_to_server(server_info);
-                        FD_SET(sockfd, &master_set);
-                        continue;
-                    }
-                    LOG(INFO) << "Server response: " << buffer;
-                }
-                else {
-                    LOG(WARNING) << "Unknown file descriptor: " << i ;
-                }
+                std::string command(input);
+                cmd.execute_command(command, sockfd);
+                is_server_up = cmd.is_server_still_up();
+                continue;
+            }
+            else if (i == sockfd && is_data_available(i, working_set))
+            { // sth from server is reached
+                buffer = "";
+                is_server_up = receive_data(sockfd, buffer);
+                if (!is_server_up)
+                    continue;
+                LOG(INFO) << "Server response: " << buffer;
+                continue;
             }
         }
     }
