@@ -99,7 +99,7 @@ std::string decode::edit_information(std::string& token, std::string new_pass, s
     return j.dump();
 }
 
-std::string decode::leave_room(std::string& token, int roomID){
+std::string decode::leave_room(std::string& token, std::string roomID){
     json j;
     j["kind"] = "leaving";
     j["token"] = token;
@@ -107,7 +107,7 @@ std::string decode::leave_room(std::string& token, int roomID){
     return j.dump();
 }
 
-std::string decode::empty_room(std::string& token, int roomID){
+std::string decode::empty_room(std::string& token, std::string roomID){
     json j;
     j["kind"] = "emptying";
     j["token"] = token;
@@ -115,7 +115,7 @@ std::string decode::empty_room(std::string& token, int roomID){
     return j.dump();
 }
 
-std::string decode::add_room(std::string& token, int roomID, int max_cap, int price){
+std::string decode::add_room(std::string& token, std::string roomID, int max_cap, int price){
     json j;
     j["kind"] = "add_room";
     j["token"] = token;
@@ -125,7 +125,7 @@ std::string decode::add_room(std::string& token, int roomID, int max_cap, int pr
     return j.dump();
 }
 
-std::string decode::modify_room(std::string& token, int roomID, int max_cap, int price){
+std::string decode::modify_room(std::string& token, std::string roomID, int max_cap, int price){
     json j;
     j["kind"] = "modify_room";
     j["token"] = token;
@@ -135,7 +135,7 @@ std::string decode::modify_room(std::string& token, int roomID, int max_cap, int
     return j.dump();
 }
 
-std::string decode::remove_room(std::string& token, int roomID){
+std::string decode::remove_room(std::string& token, std::string roomID){
     json j;
     j["kind"] = "remove_room";
     j["token"] = token;

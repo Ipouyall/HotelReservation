@@ -65,6 +65,10 @@ std::string Server::diagnose(std::string command, int client_fd) {
         rsp = pass_days(json_data_in, um, hm);
     else if (cmd == "edit_information")
         rsp = edit_user_info(json_data_in, um);
+    else if (cmd == "leaving")
+        rsp = leave_room(json_data_in, um, hm);
+    else if (cmd == "emptying")
+        rsp = empty_room(json_data_in, um, hm);
     return rsp;
 }
 
@@ -295,6 +299,33 @@ std::string Server::edit_user_info(json &j_in, UserManager &um) {
         return response("success", "110", "User information updated successfully").dump();
     else
         return response("error", "503", "Operation failed, please try again later").dump();
+}
+
+std::string Server::leave_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for leaving a room received";
+    std::string token = j_in["token"];
+    if(um.get_role(token) != UserRole::USER)
+        return response("error", "403", "Only users can leave a room!").dump();
+    int user_id = um.get_id(token);
+    std::string roomID = j_in["roomID"];
+    if(!hm.room_num_exist(roomID))
+        return response("error", "503", "That wasn't a valid room").dump();
+    if(!hm.is_user_in_room(today_date, roomID, user_id))
+        return response("error", "102", "You are not in this room (at least, yet)").dump();
+    hm.left_user_room(roomID, user_id);
+    return response("success", "413", "Hope you enjoyed our hotel, bye").dump();
+}
+
+std::string Server::empty_room(json &j_in, UserManager &um, HotelManager &hm) {
+    LOG(INFO) << "New request for emptying a room received";
+    std::string token = j_in["token"];
+    if(um.get_role(token) != UserRole::ADMIN)
+        return response("error", "403", "Only admins can manage a room!").dump();
+    std::string roomID = j_in["roomID"];
+    if(!hm.room_num_exist(roomID))
+        return response("error", "101", "That isn't a valid room").dump();
+    hm.make_room_empty(today_date, roomID);
+    return response("success", "413", "All users has kicked out").dump();
 }
 
 void Server::rewrite_data() {

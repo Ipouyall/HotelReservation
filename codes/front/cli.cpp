@@ -302,8 +302,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
         pass_day(cmd, server_fd);
     else if (command=="7" || command=="7_edit_information" || command=="edit_information")
         edit_information(cmd, server_fd);
-//    else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
-//        leave_room(cmd, server_fd);
+    else if (command=="8" || command=="8_leaving_room" || command=="leaving_room")
+        leave_room(cmd, server_fd);
 //    else if (command=="9" || command=="9_rooms" || command=="rooms")
 //        hotel_management(cmd, server_fd);
     else
@@ -721,5 +721,53 @@ void Command::edit_information(std::string command, int server_fd) {
     if (!is_server_up)
         return;
     j = json::parse(last_response);
+    show_simple_json(j);
+}
+
+void Command::leave_room(std::string command, int server_fd) {
+    LOG(INFO) << "Leaving menu...";
+    std::cout << "You can use one of the following commands:" << std::endl;
+    std::cout << "- command: room <room number>" << std::endl;
+    std::cout << ":::::::::: to leave a room" << std::endl;
+    std::cout << "- command: clear <room number>" << std::endl;
+    std::cout << ":::::::::: to kick-out all users of a room" << std::endl;
+
+    char* line = readline("> ");
+    if (line == nullptr)
+        return;
+    std::string line_str(line), t_cmd, roomID;
+    std::istringstream line_stream(line_str);
+    free(line);
+    line_stream >> t_cmd;
+    if(line_stream.eof()) {
+        std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
+        return;
+    }
+    if(t_cmd != "room" && t_cmd != "clear"){
+        std::cout << "Invalid command: " << t_cmd << std::endl;
+        return;
+    }
+    line_stream >> roomID;
+    if(roomID == "") {
+        std::cout << "Invalid command: You have to provide roomNumber" << std::endl;
+        return;
+    }
+    if(!line_stream.eof()){
+        std::cout << "Too many argument!" << std::endl;
+        return;
+    }
+    std::string request;
+    if(t_cmd == "room")
+        request = decode::leave_room(token, roomID);
+    else
+        request = decode::empty_room(token, roomID);
+
+    bool sent = send_message(server_fd, request);
+    if (!sent)
+        return;
+    is_server_up = receive_data(server_fd,last_response);
+    if (!is_server_up)
+        return;
+    json j = json::parse(last_response);
     show_simple_json(j);
 }
