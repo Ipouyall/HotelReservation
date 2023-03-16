@@ -2,6 +2,7 @@
 #define CODES_DECODER_H
 #include <nlohmann/json.hpp>
 #include <string>
+#include "../infra/saveLog.h"
 
 using json = nlohmann::json;
 

@@ -6,6 +6,7 @@
 #include "hotel.h"
 #include "dateManager.h"
 #include <string>
+#include "saveLog.h"
 
 using json = nlohmann::json;
 

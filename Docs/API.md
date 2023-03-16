@@ -28,7 +28,8 @@ On success, server would response like:
     "status_code": "230",
     "status": "User logged in.",
     "message": "You logged in successfully",
-    "token": "<auth-token>"
+    "token": "<auth-token>",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -42,6 +43,7 @@ On failure:
     "status_code": "430",
     "status": "Invalid username or password.",
     "message": "Sign_in failed due to invalid password/username or you logged in before.",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -71,6 +73,7 @@ If username is valid and available:
     "status_code": "311",
     "status": "User Signed up. Enter your password, purse, phone and address.",
     "message": "Just validated you username, please complete your registration.",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -82,6 +85,7 @@ If username has taken:
     "status_code": "231",
     "status": "User successfully signed up.",
     "message": "Username exists, try another one.",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -108,6 +112,7 @@ On success:
     "status_code": "311",
     "status": "User Signed up. Enter your password, purse, phone and address.",
     "message": "We honor to announce you are part of our community from now on.",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -119,6 +124,7 @@ On failure:
     "status_code": "503",
     "status": "Bad sequence of commands.",
     "message": "Signing up failed, make sure you entered valid data.",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -141,6 +147,7 @@ On failure:
     "status_code": "201",
     "status": "User logged out successfully.",
     "message": "Hope to see you later!",
+    "time": "<dd-mm-yyyy>"
 }
 ```
 
@@ -183,6 +190,7 @@ On success:
     "status_code": "001",
     "status": "Request validated successfully",
     "message": "Here is your information",
+    "time": "<dd-mm-yyyy>",
     "data": 
     {
         "id": "<id>",
@@ -204,6 +212,7 @@ On failure(which shouldn't normally happen):
     "status_code": "000",
     "status": "No content.",
     "message": "Couldn't find any data from this user, you may need to login again or edit your info.",
+    "time": "<dd-mm-yyyy>",
 }
 ```
 
@@ -229,6 +238,7 @@ This is only available for ***super-user***s or ***admin***s.
     "status_code": "001",
     "status": "Request validated successfully",
     "message": "Here is all users in our hotel",
+    "time": "<dd-mm-yyyy>",
     "data": 
     [
         {
@@ -252,3 +262,360 @@ This is only available for ***super-user***s or ***admin***s.
     ]
 }
 ```
+
+## View-rooms
+
+Used to get data about our hotel's users.
+
+### View-rooms/client
+
+```json
+{
+    "kind": "view_rooms_info",
+    "token": "<user-auth-token>",
+}
+```
+
+### View-rooms/server
+
+```json
+{
+    "kind": "success",
+    "status_code": "001",
+    "status": "Request validated successfully",
+    "message": "Here is our rooms information",
+    "time": "<dd-mm-yyyy>",
+    "data": 
+    [
+        {
+            "number": "<room-number>",
+            "status": "true/false",
+            "total beds": "<max-capacity>",
+            "available bed": "<current-capacity>",
+            "price(each bed)": "<price-per-bed>",
+            "users": [
+                {
+                    "id": "<id>",
+                    "beds": "<number-of-reservation>",
+                    "check-in": "<dd-mm-yyyy>",
+                    "check-out": "<dd-mm-yyyy>"
+                },
+                {
+                    "id": "<id2>",
+                    "beds": "<number-of-reservation>",
+                    "check-in": "<dd-mm-yyyy>",
+                    "check-out": "<dd-mm-yyyy>"
+                }
+            ]
+        },
+        {
+            "number": "<room-number2>",
+            "status": "true/false",
+            "total beds": "<max-capacity>",
+            "available bed": "<current-capacity>",
+            "price(each bed)": "<price-per-bed>",
+            "users": [
+                {
+                    "id": "<id>",
+                    "beds": "<number-of-reservation>",
+                    "check-in": "<dd-mm-yyyy>",
+                    "check-out": "<dd-mm-yyyy>"
+                },
+                {
+                    "id": "<id2>",
+                    "beds": "<number-of-reservation>",
+                    "check-in": "<dd-mm-yyyy>",
+                    "check-out": "<dd-mm-yyyy>"
+                }
+            ]
+        }
+    ]
+}
+
+```
+
+## Book-a-room
+
+Used to book a room.
+This is only available for ***user***s.
+
+### Book-a-room/client
+```json
+{
+    "kind": "booking",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>",
+    "beds_count": "<number-of-reservation>",
+    "check_in": "<dd-mm-yyyy>",
+    "check_out": "<dd-mm-yyyy>"
+}
+```
+
+### Book-a-room/server
+On success:
+
+```json
+{
+    "kind": "booking",
+    "status_code": "110",
+    "status": "Successfully done.",
+    "message": "Room reserved successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+On failure:
+
+```json
+{
+    "kind": "error",
+    "status_code": "110",
+    "status": "Successfully done.",
+    "message": "Room reserved successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only users can book a room",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "101",
+    "status": "The desired room was not found",
+    "message": "Room number doesn't exist",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "503",
+    "status": "Bad sequence of commands.",
+    "message": "You should cancel your previous reservation/Error in entered dates",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "108",
+    "status": "Your account balance is not enough",
+    "message": "You don't have enough money to book this room",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+```json
+{
+    "kind": "error",
+    "status_code": "109",
+    "status": "The room capacity is full",
+    "message": "Room doesn't meet your request",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## View-reservations
+Used for getting user reservations.
+This is only available for ***user***s.
+
+### View-reservations/client
+```json
+{
+    "kind": "view_reservations",
+    "token": "<user-auth-token>",
+}
+```
+
+### View-reservations/server
+On success:
+```json
+{
+    "kind": "success",
+    "status_code": "001",
+    "status": "Request validated successfully",
+    "message": "Here is your reservations",
+    "time": "<dd-mm-yyyy>",
+    "data": 
+    [
+        {
+            "room number": "<room-number>",
+            "price(per bed)": "<price-per-bed>",
+            "bed(s) you have": "<number-of-reservation>",
+            "check in": "<dd-mm-yyyy>",
+            "check out": "<dd-mm-yyyy>"
+        },
+        {
+            "room number": "<room-number2>",
+            "price(per bed)": "<price-per-bed>",
+            "bed(s) you have": "<number-of-reservation>",
+            "check in": "<dd-mm-yyyy>",
+            "check out": "<dd-mm-yyyy>"
+        }
+    ]
+}
+```
+On failure:
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only users can book a room",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+(which shouldn't normally happen):
+
+```json
+{
+    "kind": "error",
+    "status_code": "000",
+    "status": "No content.",
+    "message": "Operation failed, please try again later!",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## Pass-days
+Used to pass day of application.
+This is only available for ***super-user***s or ***admin***s.
+
+### Pass-daysView-reservations/client
+```json
+{
+    "kind": "passing_time",
+    "token": "<user-auth-token>",
+    "days": "<number-of-days>"
+}
+```
+
+### Pass-daysView-reservations/server
+On success:
+```json
+{
+    "kind": "success",
+    "status_code": "110",
+    "status": "Successfully done.",
+    "message": "System's date updated successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
+On failure:
+```json
+{
+    "kind": "error",
+    "status_code": "403",
+    "status": "Access denied!",
+    "message": "Only admins can pass days",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## Edit-user-info
+Used to edit user's information.
+
+
+### Edit-user-info/client
+```json
+{
+    "kind": "edit_information",
+    "token": "<user-auth-token>",
+    "pass": "<new password>",
+    "phone": "<user new phone number>",
+    "addr": "<user new address>",
+    "addr": "<dd-mm-yyyy>",
+}
+```
+
+### Edit-user-info/server
+On success:
+```json
+{
+    "kind": "success",
+    "status_code": "110",
+    "status": "Successfully done.",
+    "message": "User information updated successfully",
+    "time": "<dd-mm-yyyy>",
+}
+```
+On failure:
+```json
+{
+    "kind": "error",
+    "status_code": "503",
+    "status": "Bad sequence of commands.",
+    "message": "Operation failed, please try again later",
+    "time": "<dd-mm-yyyy>",
+}
+```
+
+## Leave-room
+Used when user want to leave room.
+
+### Leave-room/client
+```json
+{
+    "kind": "leaving",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>"
+}
+```
+
+### Leave-room/server
+On success:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+On failure:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+
+## Modify-room
+Used for changing the room attributes.
+This is only available for ***super-user***s or ***admin***s.
+
+### Modify-room/client
+```json
+{
+    "kind": "modify_room",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>",
+    "max_cap": "<max-capacity>",
+    "price": "<price-per-bed>"
+}
+```
+
+### Modify-room/server
+On success:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+On failure:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+
+## Remove-room
+Used for removing the room.
+This is only available for ***super-user***s or ***admin***s.
+
+### Remove-room/client
+```json
+{
+    "kind": "remove_room",
+    "token": "<user-auth-token>",
+    "roomID": "<room-number>"
+}
+```
+
+### Remove-room/server
+On success:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->
+On failure:
+<!-- /////////////////////////////////////////////////////////////////////////////////// -->

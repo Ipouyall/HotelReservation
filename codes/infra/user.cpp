@@ -288,3 +288,10 @@ std::string UserManager::get_users_data(std::string token) {
     return ju.dump();
 }
 
+std::string UserManager::get_username(std::string token){
+    int index = search_by_token(token);
+    if(index == -1)
+        return "";
+    return users[index].username;
+}
+
