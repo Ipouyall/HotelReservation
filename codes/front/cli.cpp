@@ -812,9 +812,9 @@ void Command::leave_room(std::string command, int server_fd) {
     }
     std::string request;
     if(privilege_access)
-        request = decode::leave_room(token, roomID);
-    else
         request = decode::empty_room(token, roomID);
+    else
+        request = decode::leave_room(token, roomID);
 
     bool sent = send_message(server_fd, request);
     if (!sent)

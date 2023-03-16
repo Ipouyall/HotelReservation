@@ -34,6 +34,8 @@ public:
     int get_fd();
     std::string diagnose(std::string command, int client_fd);
 
+    void shout_down(int sig_n);
+
 private:
     json response(std::string kind, std::string status_code, std::string msg);
     std::string sign_in(json& j_in, UserManager& um, int fd);
@@ -51,9 +53,9 @@ private:
     std::string view_room_info(json& j_in, UserManager& um, HotelManager& hm); // TODO: Optional
     std::string leave_room(json& j_in, UserManager& um, HotelManager& hm);
     std::string empty_room(json& j_in, UserManager& um, HotelManager& hm);
-    std::string add_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
-    std::string modify_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
-    std::string remove_a_room(json& j_in, UserManager& um, HotelManager& hm); // TODO: implement dependency
+    std::string add_a_room(json& j_in, UserManager& um, HotelManager& hm);
+    std::string modify_a_room(json& j_in, UserManager& um, HotelManager& hm);
+    std::string remove_a_room(json& j_in, UserManager& um, HotelManager& hm);
 
     void rewrite_data();
     void set_time();

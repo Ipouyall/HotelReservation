@@ -401,3 +401,11 @@ void Server::set_time() {
     }
     today_date = dateManager::convert(t_time);
 }
+
+void Server::shout_down(int sig_n) {
+    LOG(INFO) << "Shutting down...";
+    rewrite_data();
+    LOG(INFO) << "Data saved successfully";
+    LOG(INFO) << "Goodbye!";
+    exit(0);
+}
