@@ -150,3 +150,13 @@ And you would earn ***50%*** of the money back:
 ![balance after cancelling](Docs/screenshots/profile-after-cancel.png)
 
 ### Pass day
+
+
+### Ending program
+
+- To quit client:
+  - You can use `quit` or `exit` command
+  - You can use `Ctrl + C` to quit
+- To quit server:
+  - You can use `exit` or `quit` command
+  - You shouldn't use `Ctrl + C` to quit, it is unsafe and wouldn't save the state of the server

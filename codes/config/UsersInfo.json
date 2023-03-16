@@ -32,6 +32,15 @@
             "purse": "10",
             "phoneNumber": "00989112659874",
             "address": "Iran, Rasht"
+        },
+        {
+            "id": 4,
+            "user": "Pouya",
+            "password": "1357",
+            "admin": false,
+            "purse": "750",
+            "phoneNumber": "09123456789",
+            "address": "Iran, kerman"
         }
     ]
 }

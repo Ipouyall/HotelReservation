@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
             if (i == STDIN_FILENO){
                 std::string command;
                 std::cin >> command;
-                if (command == "exit"){
+                if (command == "exit" || command == "quit"){
                     server.shout_down(0);
                     google::ShutdownGoogleLogging();
                     exit(0);

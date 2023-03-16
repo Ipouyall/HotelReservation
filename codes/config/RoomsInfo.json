@@ -6,7 +6,14 @@
             "price": 100,
             "maxCapacity": 2,
             "capacity": 2,
-            "users": []
+            "users": [
+                {
+                    "id": 4,
+                    "numOfBeds": 1,
+                    "reserveDate": "04-04-2023",
+                    "checkoutDate": "07-04-2023"
+                }
+            ]
         },
         {
             "number": "102",
