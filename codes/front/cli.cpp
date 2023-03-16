@@ -342,6 +342,8 @@ void Command::execute_reservation_command(const std::string& cmd, int server_fd)
     else
         std::cerr << "Unknown command: '" << command << "'\n" <<
                      "::use <help> command to learn about commands" << std::endl;
+    if (command == "clear")
+        return;
     std::cout << "Press <Enter> to continue...";
     std::cin.get();
 }
