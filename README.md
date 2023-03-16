@@ -191,4 +191,5 @@ To logout from their account in a client.
 For more detail, you can read these docs:
 - [API](Docs/API.md)
 - [User Manager class](Docs/UserManager.md)
+- [Hotel Manager class](Docs/HotelManager.md)
 - [Logs](Docs/Logs.md)
