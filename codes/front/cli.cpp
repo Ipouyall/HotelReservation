@@ -122,6 +122,8 @@ void Command::signup(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     if (j["kind"]=="error"){
+        save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] != "error", "general",
+                         j["status_code"], j["status"],j["message"], "signup");
         show_simple_json(j);
         return;
     }
@@ -138,6 +140,11 @@ void Command::signup(std::string cmd, int server_fd) {
         return;
     is_server_up = receive_data(server_fd,last_response);
     j = json::parse(last_response);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] != "error",
+                 "general", j["status_code"], j["status"],j["message"], "signup");
+    if(j["kind"] != "error")
+        save_client_log(dateManager::convert(j["time"]), "client/", true, username,
+         j["status_code"], j["status"], j["message"], "signup");
     show_simple_json(j);
 }
 
@@ -165,10 +172,14 @@ void Command::login(std::string cmd, int server_fd) {
     json j = json::parse(last_response);
     show_simple_json(j);
     if (j["kind"]!="success"){
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] != "error", "general",
+                             j["status_code"], j["status"],j["message"], "login");
         return;
     }
     token = j["token"];
     logged_in=true;
+    save_client_log(dateManager::convert(j["time"]), "client/", true, username, j["status_code"], 
+                        j["status"], j["message"], "login");
     privilege_access = j["privilege"];
     clear_history();
 }
@@ -188,10 +199,13 @@ void Command::recover_state(int server_fd) {
         LOG(ERROR) << "Couldn't recover previous state!";
         logged_in=false;
         token="";
+        save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] != "error", "general",
+                                 j["status_code"], j["status"], j["message"], "recover");
         return;
     }
     token = j["token"];
     logged_in=true;
+    save_client_log(dateManager::convert(j["time"]), "client/", true, username, j["status_code"], j["status"], j["message"], "recover");
 }
 
 void Command::activate_autocompletion() {
@@ -363,6 +377,8 @@ void Command::logout(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "logout");
     token="";
     logged_in=false;
     username="";
@@ -390,6 +406,8 @@ void Command::view_user_info(std::string cmd, int server_fd) {
         print_user_info(ud);
         std::cout<< "*----------------||----------------*" << std::endl;
     }
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "View user information");
 }
 
 void Command::view_users(std::string cmd, int server_fd) {
@@ -410,6 +428,8 @@ void Command::view_users(std::string cmd, int server_fd) {
     std::string udata = j["data"];
     if(j["kind"]=="success")
         print_users_info(udata);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "View all users");
 }
 
 void Command::view_rooms(std::string cmd, int server_fd) {
@@ -440,6 +460,8 @@ void Command::view_rooms(std::string cmd, int server_fd) {
     std::string udata = j["data"];
     if(j["kind"]=="success")
         print_rooms_info(udata, available_f, empty_f);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "View rooms information");
 }
 
 void Command::book_room(std::string cmd, int server_fd) {
@@ -511,6 +533,8 @@ void Command::book_room(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "Booking");
 }
 
 template<typename T>
@@ -602,6 +626,8 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "Get reservations");
     if(j["kind"] != "success")
         return;
     std::string data = j["data"];
@@ -632,6 +658,8 @@ void Command::cancel_reservation(std::string cmd, int server_fd) {
         return;
     j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                username, j["status_code"], j["status"], j["message"], "Cancelling");
 }
 
 void print_rooms_info(std::string rooms_data, bool filter_available, bool filter_empty){
@@ -700,6 +728,9 @@ void Command::pass_day(std::string cmd, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                                     username, j["status_code"], j["status"], j["message"], "Pass day");
+
 }
 
 void Command::edit_information(std::string command, int server_fd) {
@@ -722,6 +753,8 @@ void Command::edit_information(std::string command, int server_fd) {
     else
     {
         show_simple_json(j);
+        save_client_log(dateManager::convert(j["time"]), "client/", false, username,
+                         j["status_code"], j["status"], j["message"], "View user information");
         return;
     }
     bool extend = ud.contains("address");
@@ -775,6 +808,11 @@ void Command::edit_information(std::string command, int server_fd) {
         return;
     j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                username, j["status_code"], j["status"], j["message"], 
+                t_cmd == "password" ? "Edit information|password" :
+                t_cmd == "phone" ? "Edit information|phone" :
+                t_cmd == "address" ? "Edit information|address" : "");
 }
 
 void Command::leave_room(std::string command, int server_fd) {
@@ -826,6 +864,9 @@ void Command::leave_room(std::string command, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                username, j["status_code"], j["status"], j["message"], 
+                privilege_access ? "Leaving room|making empty" : "Leaving room|leaving");
 }
 
 void Command::hotel_management(std::string command, int server_fd) {
@@ -925,4 +966,9 @@ void Command::hotel_management(std::string command, int server_fd) {
         return;
     json j = json::parse(last_response);
     show_simple_json(j);
+    save_client_log(dateManager::convert(j["time"]), "client/", j["kind"] == "success",
+                username, j["status_code"], j["status"], j["message"], 
+                t_cmd == "add" ? "Rooms|add" :
+                t_cmd == "modify" ? "Rooms|modify" :
+                t_cmd == "address" ? "Rooms|remove" : "");
 }

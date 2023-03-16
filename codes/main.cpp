@@ -1,6 +1,7 @@
 #include "infra/server.h"
 #include "infra/hotel.h"
 #include "infra/user.h"
+#include "infra/saveLog.h"
 #include "infra/dateManager.h"
 #include <iostream>
 #include <signal.h>
@@ -68,6 +69,7 @@ int main(int argc, char **argv) { // using just for test functionalities
     std::string date_now = "25-02-2023";
     std::cout << "*******************************************initial*******************************************" << std::endl;
     h_manager.update_date(dateManager::convert(date_now));
+ 
     h_manager.print_info();
 
     int day_pass = 0;

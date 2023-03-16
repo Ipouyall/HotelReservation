@@ -56,6 +56,7 @@ public:
     void client_dead(int fd);
     std::string get_user_data(std::string token);
     std::string get_users_data(std::string token);
+    std::string get_username(std::string token);
 };
 
 
