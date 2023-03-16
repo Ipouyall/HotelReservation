@@ -41,6 +41,21 @@
             "purse": "750",
             "phoneNumber": "09123456789",
             "address": "Iran, kerman"
+        },
+        {
+            "id": 5,
+            "user": "Ali",
+            "password": "2813",
+            "admin": false,
+            "purse": "1580",
+            "phoneNumber": "09197555740",
+            "address": "Iran, tehran"
+        },
+        {
+            "id": 0,
+            "user": "Alireza",
+            "password": "admin2",
+            "admin": true
         }
     ]
 }
