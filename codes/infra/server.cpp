@@ -513,6 +513,13 @@ std::string Server::modify_a_room(json &j_in, UserManager &um, HotelManager &hm)
                          rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
         return rsp.dump();
     }
+    if(!hm.capacity_validation(roomID, max_cap)){
+        rsp = response("error", "401", "Modification failed due to future reservation's conflict with new maximum capacity");
+        save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
+                        rsp["status_code"], rsp["status"], rsp["message"], "Rooms|modify");
+        return rsp.dump();
+    }
+
     if(!hm.modify_room(roomID, max_cap, price)){
         rsp = response("error", "000", "Couldn't modify room!!!");
         save_server_log(today_date, "server/", rsp["kind"]=="success", um.get_username(token), -1,
