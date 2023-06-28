@@ -43,7 +43,7 @@ This command would generate executable files, `bin/test`, `bin/client`, `bin/ser
 
 - Powerful CLI
   - enabled auto-completion: use `tab` for this feature
-  - command history: use `up` and `down` arrow keys for this feature
+  - command history: use `up-arrow` and `down-arrow` keys for this feature
 - Handle multiple clients
 - State recovering: if server restarted, it would remember the previous logged in clients
 
@@ -54,7 +54,7 @@ This command would generate executable files, `bin/test`, `bin/client`, `bin/ser
 - To start server:
 
 ```shell
-./hr_server
+.bin/server
 ```
 
 After starting, it would ask for current date:
@@ -66,7 +66,7 @@ After setting system's date, server would start listen on the port specified in 
 - To start client:
 
 ```shell
-./hr_client
+.bin/client
 ```
 
 After connecting to server, command-line tools would get activated.
