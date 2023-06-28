@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(HotelReservation VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -33,7 +34,9 @@ FetchContent_MakeAvailable(date)
 
 find_library(LIBEDIT_LIBRARY edit)
 
-add_executable(hr_test
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+add_executable(test
         main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
@@ -44,7 +47,11 @@ add_executable(hr_test
         infra/saveLog.cpp
         infra/client.cpp
         )
-add_executable(hr_server
+set_target_properties(test PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        )
+
+add_executable(server
         server/main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
@@ -55,7 +62,11 @@ add_executable(hr_server
         infra/saveLog.cpp
         infra/client.cpp
         )
-add_executable(hr_client
+set_target_properties(server PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        )
+
+add_executable(client
         client/main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
@@ -67,8 +78,10 @@ add_executable(hr_client
         infra/client.cpp
         front/cli.cpp
         )
+set_target_properties(client PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        )
 
-target_link_libraries(hr_test nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)
-target_link_libraries(hr_server nlohmann_json glog::glog date)
-target_link_libraries(hr_client nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)
-
+target_link_libraries(test nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)
+target_link_libraries(server nlohmann_json glog::glog date)
+target_link_libraries(client nlohmann_json glog::glog ${LIBEDIT_LIBRARY} date)

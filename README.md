@@ -26,7 +26,7 @@ Run:
 cmake .
 ```
 
-This could take up to 30(min) for the first time.
+This could take up to 10(min) for the first time.
 
 ### Build project
 
@@ -36,14 +36,14 @@ Run:
 make
 ```
 
-This command would generate `hr_test`, `hr_client`, `hr_server`.
+This command would generate executable files, `bin/test`, `bin/client`, `bin/server`.
 ***
 
 ## Features
 
 - Powerful CLI
   - enabled auto-completion: use `tab` for this feature
-  - command history: use `up` and `down` arrow keys for this feature
+  - command history: use `up-arrow` and `down-arrow` keys for this feature
 - Handle multiple clients
 - State recovering: if server restarted, it would remember the previous logged in clients
 
@@ -54,7 +54,7 @@ This command would generate `hr_test`, `hr_client`, `hr_server`.
 - To start server:
 
 ```shell
-./hr_server
+./bin/server
 ```
 
 After starting, it would ask for current date:
@@ -66,7 +66,7 @@ After setting system's date, server would start listen on the port specified in 
 - To start client:
 
 ```shell
-./hr_client
+./bin/client
 ```
 
 After connecting to server, command-line tools would get activated.
@@ -185,8 +185,16 @@ To logout from their account in a client.
   - You can use `exit` or `quit` command
   - You shouldn't use `Ctrl + C` to quit, it is unsafe and wouldn't save the state of the server
 
+### Logging
+
+To change log level, you can use below command:
+
+- `verbose+`: medium log level, logging warning and error logs.
+- `verbose++`: highest log level, logging everything, including info, warning and error logs.
+- `verbose-`: Default log level, lowest level and just reporting errors.
+
 ***
-## Reference
+## Documentation
 
 For more detail, you can read these docs:
 - [API](Docs/API.md)
