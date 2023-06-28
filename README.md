@@ -186,7 +186,7 @@ To logout from their account in a client.
   - You shouldn't use `Ctrl + C` to quit, it is unsafe and wouldn't save the state of the server
 
 ***
-## Reference
+## Documentation
 
 For more detail, you can read these docs:
 - [API](Docs/API.md)
