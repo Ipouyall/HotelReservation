@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+#set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 project(HotelReservation VERSION 0.0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -34,7 +34,7 @@ FetchContent_MakeAvailable(date)
 
 find_library(LIBEDIT_LIBRARY edit)
 
-add_executable(hr_test
+add_executable(bin/test
         main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
@@ -45,7 +45,7 @@ add_executable(hr_test
         infra/saveLog.cpp
         infra/client.cpp
         )
-add_executable(hr_server
+add_executable(bin/server
         server/main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
@@ -56,7 +56,7 @@ add_executable(hr_server
         infra/saveLog.cpp
         infra/client.cpp
         )
-add_executable(hr_client
+add_executable(bin/client
         client/main.cpp
         infra/filehandler.cpp
         infra/hotel.cpp
