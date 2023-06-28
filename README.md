@@ -54,7 +54,7 @@ This command would generate executable files, `bin/test`, `bin/client`, `bin/ser
 - To start server:
 
 ```shell
-.bin/server
+./bin/server
 ```
 
 After starting, it would ask for current date:
@@ -66,7 +66,7 @@ After setting system's date, server would start listen on the port specified in 
 - To start client:
 
 ```shell
-.bin/client
+./bin/client
 ```
 
 After connecting to server, command-line tools would get activated.
@@ -184,6 +184,14 @@ To logout from their account in a client.
 - To quit server:
   - You can use `exit` or `quit` command
   - You shouldn't use `Ctrl + C` to quit, it is unsafe and wouldn't save the state of the server
+
+### Logging
+
+To change log level, you can use below command:
+
+- `verbose+`: medium log level, logging warning and error logs.
+- `verbose++`: highest log level, logging everything, including info, warning and error logs.
+- `verbose-`: Default log level, lowest level and just reporting errors.
 
 ***
 ## Documentation
